@@ -219,7 +219,7 @@ function ContentManagementTab({ contents, onCreate, onEdit, onDelete }: any) {
                   </td>
                 </tr>
               ) : (
-                contents.map((content: Content) => (
+                contents.map((content: CMSContent) => (
                   <tr key={content.id}>
                     <td className="px-6 py-4">
                       <div>
