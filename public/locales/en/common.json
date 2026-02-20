@@ -1,0 +1,96 @@
+{
+  "navigation": {
+    "home": "Home",
+    "vps": "VPS",
+    "aiTools": "AI Tools",
+    "tutorials": "Tutorials",
+    "comparisons": "Comparisons",
+    "resources": "Resources",
+    "admin": "Admin"
+  },
+  "footer": {
+    "about": "About",
+    "aboutText": "SEO-driven content monetization platform providing in-depth reviews, comparisons, and tutorials to help you make informed decisions.",
+    "categories": "Categories",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "affiliateDisclosure": "Affiliate Disclosure",
+    "copyright": "© 2026 CMS. All rights reserved."
+  },
+  "home": {
+    "title": "Find the Best Tools & Services",
+    "subtitle": "In-depth reviews, comparisons, and tutorials to help you make informed decisions",
+    "vps": {
+      "title": "VPS Hosting",
+      "description": "Find the best VPS providers for your projects"
+    },
+    "aiTools": {
+      "title": "AI Tools",
+      "description": "Discover powerful AI tools and services"
+    },
+    "tutorials": {
+      "title": "Tutorials",
+      "description": "Step-by-step guides for developers"
+    },
+    "comparisons": {
+      "title": "Comparisons",
+      "description": "Compare products side by side"
+    },
+    "resources": {
+      "title": "Resources",
+      "description": "In-depth guides and resources"
+    },
+    "affiliateDisclosure": "Affiliate Disclosure",
+    "affiliateDisclosureText": "We may earn a commission when you purchase through our links. This helps us continue providing free content and reviews. We only recommend products we trust."
+  },
+  "languageSwitcher": {
+    "switchLanguage": "Switch Language",
+    "english": "English",
+    "chinese": "中文"
+  },
+  "cta": {
+    "getStarted": "Get Started",
+    "tryNow": "Try Now",
+    "learnMore": "Learn More",
+    "viewDetails": "View Details"
+  },
+  "page": {
+    "readMore": "Read More",
+    "share": "Share",
+    "lastUpdated": "Last updated"
+  },
+  "admin": {
+    "dashboard": "Content Management Dashboard",
+    "content": "Content",
+    "seoTools": "SEO Tools",
+    "adsAffiliates": "Ads & Affiliates",
+    "analytics": "Analytics",
+    "createNewPage": "Create New Page",
+    "title": "Title",
+    "type": "Type",
+    "status": "Status",
+    "actions": "Actions",
+    "published": "Published",
+    "draft": "Draft",
+    "edit": "Edit",
+    "delete": "Delete",
+    "template": "Template",
+    "seoGenerator": "SEO Generator",
+    "pageType": "Page Type",
+    "targetKeyword": "Target Keyword",
+    "generateSEO": "Generate SEO",
+    "generatedData": "Generated SEO Data",
+    "internalLinkGenerator": "Internal Link Generator",
+    "generateInternalLinks": "Generate Internal Links",
+    "adSlots": "Ad Slots",
+    "affiliateLinks": "Affiliate Links",
+    "addLink": "Add Link",
+    "totalViews": "Total Views",
+    "adRevenue": "Ad Revenue",
+    "affiliateRevenue": "Affiliate Revenue",
+    "conversionRate": "Conversion Rate",
+    "topPerforming": "Top Performing Pages",
+    "optimizationSuggestions": "Optimization Suggestions"
+  }
+}
