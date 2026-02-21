@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { seoEngine } from '@/lib/seo-engine'
 import { mockRecommendationPage } from '@/lib/data/mock-data'
 import RecommendationTemplate from '@/components/templates/RecommendationTemplate'
+import PageEditorButton from '@/components/editor/PageEditorButton'
 import { type Locale } from '@/lib/i18n-config'
 
 interface VPSPageProps {
@@ -71,6 +72,7 @@ export default async function VPSPage({ params }: VPSPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
+      <PageEditorButton locale={locale as Locale} pageId="vps" />
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 py-16">
         <div className="max-w-4xl mx-auto px-4 text-center text-white">
           <div className="mb-6">
