@@ -1,27 +1,31 @@
-import { Metadata } from 'next'
-import { seoEngine } from '@/lib/seo-engine'
-import { mockReviewPage } from '@/lib/data/mock-data'
-import ReviewTemplate from '@/components/templates/ReviewTemplate'
+import { Metadata } from "next";
+import { seoEngine } from "@/lib/seo-engine";
+import { mockReviewPage } from "@/lib/data/mock-data";
+import ReviewTemplate from "@/components/templates/ReviewTemplate";
 
 // 生成SEO配置
-const seo = seoEngine.generateSEO('review' as any, {
-  productName: 'Vultr',
-  keyword: 'vultr review',
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/vps/vultr-review`
-})
+const seo = seoEngine.generateSEO("review" as any, {
+  productName: "Vultr",
+  keyword: "vultr review",
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/vps/vultr-review`,
+});
 
 // 生成Schema
-const schema = seoEngine.generateSchema('review' as any, {
-  title: seo.title,
-  productName: 'Vultr',
-  rating: mockReviewPage.product.rating
-}, '/vps/vultr-review')
+const schema = seoEngine.generateSchema(
+  "review" as any,
+  {
+    title: seo.title,
+    productName: "Vultr",
+    rating: mockReviewPage.product.rating,
+  },
+  "/vps/vultr-review",
+);
 
 export const metadata: Metadata = {
   title: seo.title,
   description: seo.description,
   keywords: seo.keywords,
-}
+};
 
 export default function ReviewDynamicPage() {
   return (
@@ -42,5 +46,5 @@ export default function ReviewDynamicPage() {
       </div>
       <ReviewTemplate data={mockReviewPage} />
     </>
-  )
+  );
 }
