@@ -6,12 +6,16 @@
 
 在浏览器打开：
 ```
-http://localhost:3000/admin
+http://localhost:3000/zh/admin
 ```
 或部署后的域名：
 ```
-https://your-domain.com/admin
+https://www.xcodezg.com/zh/admin
 ```
+
+**注意**：
+- 访问时会显示新手引导，请按提示操作
+- 右上角有【帮助】按钮，随时可以查看详细说明
 
 ### 第2步：上传图片/视频
 
