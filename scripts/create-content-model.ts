@@ -1,11 +1,11 @@
 import { createClient } from 'contentful-management'
 
 const spaceId = '5mfah267428e'
-const managementToken = 'CFPAT-Sbl_udUT0Cx8VtylWzaoKnXmhvN_9fzaJ1HguvGs8P4'
+const managementToken = process.env.CONTENTFUL_MANAGEMENT_TOKEN || 'CFPAT-Sbl_udUT0Cx8VtylWzaoKnXmhvN_9fzaJ1HguvGs8P4'
 
 // 创建 Content Model 的脚本
 async function createContentModel() {
-  if (!managementToken || managementToken === 'your_management_token_here') {
+  if (!managementToken || managementToken === '') {
     console.error('❌ 请设置 CONTENTFUL_MANAGEMENT_TOKEN 环境变量')
     console.log('📝 获取步骤：')
     console.log('1. 进入 Contentful 控制台')
@@ -28,19 +28,13 @@ async function createContentModel() {
 
     if (existingModel) {
       console.log('⚠️  Content Model 已存在，正在更新...')
-      await environment.deleteContentType(existingModel.sys.id)
+      const contentType = await environment.getContentType(existingModel.sys.id)
+      await contentType.delete()
     }
 
     console.log('📦 正在创建 Content Model: Content...')
 
-    // 创建 Content Model
-    const contentModel = await environment.createContentType({
-      name: 'Content',
-      description: '网站主要内容',
-      displayField: 'title',
-    })
-
-    // 添加字段
+    // 定义字段
     const fields = [
       {
         id: 'title',
@@ -123,17 +117,13 @@ async function createContentModel() {
       },
     ]
 
-    for (const field of fields) {
-      try {
-        await contentModel.createField(field)
-        console.log(`✅ 已创建字段: ${field.name}`)
-      } catch (error: any) {
-        console.error(`❌ 创建字段失败 ${field.name}:`, error.message)
-      }
-    }
-
-    // 更新模型以应用更改
-    await contentModel.update()
+    // 创建 Content Model
+    const contentModel = await environment.createContentType({
+      name: 'Content',
+      description: '网站主要内容',
+      displayField: 'title',
+      fields: fields as any,
+    })
     await contentModel.publish()
 
     console.log('🎉 Content Model 创建成功！')
