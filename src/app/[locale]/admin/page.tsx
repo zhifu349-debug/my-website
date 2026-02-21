@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { PageType } from "@/types/content";
 import { seoEngine } from "@/lib/seo-engine";
 import ContentEditor from "@/components/admin/ContentEditor";
@@ -12,8 +12,17 @@ import HelpPanel from "@/components/admin/HelpPanel";
 import { CMSContent } from "@/lib/cms-types";
 
 function AdminContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const editPageId = searchParams?.get("edit");
+
+  // 检查登录状态
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('adminToken');
+    if (!isLoggedIn) {
+      router.push('/zh/admin/login');
+    }
+  }, [router]);
 
   const [activeTab, setActiveTab] = useState<
     "content" | "media" | "seo" | "analytics" | "homepage"
@@ -147,6 +156,15 @@ function AdminContent() {
               >
                 专业模式
               </button>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('adminToken');
+                  router.push('/zh/admin/login');
+                }}
+                className="px-4 py-2 bg-red-100 text-red-600 rounded-lg font-medium hover:bg-red-200 transition-colors"
+              >
+                登出
+              </button>
             </div>
           </div>
         </div>
@@ -165,7 +183,7 @@ function AdminContent() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as "content" | "media" | "seo" | "analytics" | "homepage")}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? "border-primary text-primary"
@@ -217,7 +235,12 @@ function AdminContent() {
   );
 }
 
-function ContentManagementTab({ contents, onCreate, onEdit, onDelete }: any) {
+function ContentManagementTab({ contents, onCreate, onEdit, onDelete }: {
+  contents: CMSContent[];
+  onCreate: () => void;
+  onEdit: (content: CMSContent) => void;
+  onDelete: (id: string) => void;
+}) {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -538,14 +561,14 @@ function AnalyticsTab() {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <h3 className="font-medium text-yellow-800">Low Conversion Rate</h3>
             <p className="text-sm text-yellow-700 mt-1">
-              "V2Ray Setup" has high traffic but low conversions. Consider
+              &quot;V2Ray Setup&quot; has high traffic but low conversions. Consider
               updating CTAs.
             </p>
           </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <h3 className="font-medium text-green-800">High Performing Page</h3>
             <p className="text-sm text-green-700 mt-1">
-              "Best VPS 2026" is performing well. Consider creating similar
+              &quot;Best VPS 2026&quot; is performing well. Consider creating similar
               content.
             </p>
           </div>
@@ -555,12 +578,28 @@ function AnalyticsTab() {
   );
 }
 
+interface HomepageData {
+  title: {
+    en: string;
+    zh: string;
+  };
+  subtitle: {
+    en: string;
+    zh: string;
+  };
+  stats: {
+    users: string;
+    reviews: string;
+    rating: string;
+  };
+}
+
 function HomepageSettingsTab({
   data,
   onChange,
 }: {
-  data: any;
-  onChange: (data: any) => void;
+  data: HomepageData;
+  onChange: (data: HomepageData) => void;
 }) {
   const handleSave = () => {
     localStorage.setItem("homepageData", JSON.stringify(data));
@@ -710,7 +749,7 @@ function HomepageSettingsTab({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h3 className="font-medium text-blue-800 mb-2">💡 提示</h3>
         <p className="text-sm text-blue-700">
-          修改首页内容后，点击"保存更改"按钮。修改会在刷新页面后生效。
+          修改首页内容后，点击&ldquo;保存更改&rdquo;按钮。修改会在刷新页面后生效。
         </p>
       </div>
     </div>
