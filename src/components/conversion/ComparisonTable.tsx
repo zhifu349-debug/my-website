@@ -1,12 +1,15 @@
 interface ComparisonTableProps {
-  headers: string[]
+  headers: string[];
   rows: Array<{
-    feature: string
-    values: (string | number)[]
-  }>
+    feature: string;
+    values: (string | number)[];
+  }>;
 }
 
-export default function ComparisonTable({ headers, rows }: ComparisonTableProps) {
+export default function ComparisonTable({
+  headers,
+  rows,
+}: ComparisonTableProps) {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 border border-gray-200">
@@ -24,12 +27,18 @@ export default function ComparisonTable({ headers, rows }: ComparisonTableProps)
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+            <tr
+              key={rowIndex}
+              className={rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
+            >
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {row.feature}
               </td>
               {row.values.map((value, valueIndex) => (
-                <td key={valueIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td
+                  key={valueIndex}
+                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                >
                   {value}
                 </td>
               ))}
@@ -38,5 +47,5 @@ export default function ComparisonTable({ headers, rows }: ComparisonTableProps)
         </tbody>
       </table>
     </div>
-  )
+  );
 }
