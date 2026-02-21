@@ -1,7 +1,7 @@
-import { FAQ } from '@/types/content'
+import { FAQ } from "@/types/content";
 
 interface FAQSectionProps {
-  faqs: FAQ[]
+  faqs: FAQ[];
 }
 
 export default function FAQSection({ faqs }: FAQSectionProps) {
@@ -20,11 +20,13 @@ export default function FAQSection({ faqs }: FAQSectionProps) {
               <h3 className="font-semibold text-gray-900 bg-gray-50 px-6 py-4">
                 {faq.question}
               </h3>
-              <p className="text-gray-600 px-6 py-4 leading-relaxed">{faq.answer}</p>
+              <p className="text-gray-600 px-6 py-4 leading-relaxed">
+                {faq.answer}
+              </p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
