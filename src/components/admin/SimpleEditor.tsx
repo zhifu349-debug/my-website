@@ -1,76 +1,117 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { CMSContent, ContentStatus } from '@/lib/cms-types'
-import MediaLibrary from './MediaLibrary'
+import { useState } from "react";
+import { CMSContent, ContentStatus } from "@/lib/cms-types";
+import MediaLibrary from "./MediaLibrary";
 
 interface SimpleEditorProps {
-  content?: CMSContent
-  onSave: (content: Partial<CMSContent>) => Promise<void>
-  onCancel: () => void
+  content?: CMSContent;
+  onSave: (content: Partial<CMSContent>) => Promise<void>;
+  onCancel: () => void;
 }
 
-export default function SimpleEditor({ content, onSave, onCancel }: SimpleEditorProps) {
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+export default function SimpleEditor({
+  content,
+  onSave,
+  onCancel,
+}: SimpleEditorProps) {
+  const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // 步骤1：基本信息
-  const [type, setType] = useState(content?.type || 'recommendation')
-  const [title, setTitle] = useState(content?.title.en || '')
-  const [status, setStatus] = useState<ContentStatus>(content?.status || 'draft')
+  const [type, setType] = useState(content?.type || "recommendation");
+  const [title, setTitle] = useState(content?.title.en || "");
+  const [status, setStatus] = useState<ContentStatus>(
+    content?.status || "draft",
+  );
 
   // 步骤2：内容
-  const [intro, setIntro] = useState(content?.content.en.intro || '')
-  const [mainContent, setMainContent] = useState(content?.content.en.sections.map(s => s.content).join('\n\n') || '')
-  const [featuredImage, setFeaturedImage] = useState(content?.featuredImage || '')
+  const [intro, setIntro] = useState(content?.content.en.intro || "");
+  const [mainContent, setMainContent] = useState(
+    content?.content.en.sections.map((s) => s.content).join("\n\n") || "",
+  );
+  const [featuredImage, setFeaturedImage] = useState(
+    content?.featuredImage || "",
+  );
 
   // 步骤3：确认
-  const [showMediaLibrary, setShowMediaLibrary] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const typeOptions = [
-    { value: 'recommendation', label: '推荐文章', icon: '⭐', desc: '推荐多个产品，像"最好的VPS主机"' },
-    { value: 'review', label: '产品评测', icon: '📊', desc: '深度评测一个产品' },
-    { value: 'comparison', label: '产品对比', icon: '⚖️', desc: '对比两个或多个产品' },
-    { value: 'tutorial', label: '教程指南', icon: '📚', desc: '分步教程，如"如何使用V2Ray"' },
-    { value: 'resource', label: '资源分享', icon: '📦', desc: '分享付费资源或工具' }
-  ]
+    {
+      value: "recommendation",
+      label: "推荐文章",
+      icon: "⭐",
+      desc: '推荐多个产品，像"最好的VPS主机"',
+    },
+    {
+      value: "review",
+      label: "产品评测",
+      icon: "📊",
+      desc: "深度评测一个产品",
+    },
+    {
+      value: "comparison",
+      label: "产品对比",
+      icon: "⚖️",
+      desc: "对比两个或多个产品",
+    },
+    {
+      value: "tutorial",
+      label: "教程指南",
+      icon: "📚",
+      desc: '分步教程，如"如何使用V2Ray"',
+    },
+    {
+      value: "resource",
+      label: "资源分享",
+      icon: "📦",
+      desc: "分享付费资源或工具",
+    },
+  ];
 
   const handleSave = async (publish: boolean = false) => {
-    setIsSaving(true)
+    setIsSaving(true);
 
-    const sections = mainContent.split('\n\n').filter(Boolean).map((text, index) => ({
-      id: `section-${index}`,
-      type: 'text' as const,
-      content: text.trim(),
-      order: index
-    }))
+    const sections = mainContent
+      .split("\n\n")
+      .filter(Boolean)
+      .map((text, index) => ({
+        id: `section-${index}`,
+        type: "text" as const,
+        content: text.trim(),
+        order: index,
+      }));
 
     const contentToSave: Partial<CMSContent> = {
       type,
       title: { en: title, zh: title },
-      slug: title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''),
-      status: publish ? 'published' : 'draft',
+      slug: title
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]/g, ""),
+      status: publish ? "published" : "draft",
       seo: {
         title: { en: title, zh: title },
         description: { en: intro, zh: intro },
-        keywords: { en: '', zh: '' },
-        canonical: ''
+        keywords: { en: "", zh: "" },
+        canonical: "",
       },
       content: {
         en: { intro, sections, faq: [] },
-        zh: { intro, sections, faq: [] }
+        zh: { intro, sections, faq: [] },
       },
       featuredImage,
-      author: 'admin',
-      locale: 'en'
-    }
+      author: "admin",
+      locale: "en",
+    };
 
     try {
-      await onSave(contentToSave)
+      await onSave(contentToSave);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
@@ -80,18 +121,26 @@ export default function SimpleEditor({ content, onSave, onCancel }: SimpleEditor
           <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {content ? '编辑文章' : '创建新文章'}
+                {content ? "编辑文章" : "创建新文章"}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                步骤 {step} / 3
-              </p>
+              <p className="text-sm text-gray-500 mt-1">步骤 {step} / 3</p>
             </div>
             <button
               onClick={onCancel}
               className="text-gray-500 hover:text-gray-700 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -99,11 +148,13 @@ export default function SimpleEditor({ content, onSave, onCancel }: SimpleEditor
           {/* 进度条 */}
           <div className="bg-gray-100 px-8 py-2">
             <div className="flex gap-2">
-              {[1, 2, 3].map(s => (
+              {[1, 2, 3].map((s) => (
                 <div
                   key={s}
                   className={`flex-1 h-2 rounded-full transition-all ${
-                    s <= step ? 'bg-gradient-to-r from-blue-600 to-purple-600' : 'bg-gray-300'
+                    s <= step
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600"
+                      : "bg-gray-300"
                   }`}
                 />
               ))}
@@ -167,16 +218,26 @@ export default function SimpleEditor({ content, onSave, onCancel }: SimpleEditor
                   onClick={() => setShowMediaLibrary(false)}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
               <div className="p-6">
                 <MediaLibrary
                   onSelect={(media) => {
-                    setFeaturedImage(media.url)
-                    setShowMediaLibrary(false)
+                    setFeaturedImage(media.url);
+                    setShowMediaLibrary(false);
                   }}
                 />
               </div>
@@ -185,18 +246,52 @@ export default function SimpleEditor({ content, onSave, onCancel }: SimpleEditor
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // 步骤1：基本信息
-function Step1BasicInfo({ type, title, status, onTypeChange, onTitleChange, onStatusChange, onNext, onCancel }: any) {
+function Step1BasicInfo({
+  type,
+  title,
+  status,
+  onTypeChange,
+  onTitleChange,
+  onStatusChange,
+  onNext,
+  onCancel,
+}: any) {
   const typeOptions = [
-    { value: 'recommendation', label: '推荐文章', icon: '⭐', desc: '推荐多个产品，像"最好的VPS主机"' },
-    { value: 'review', label: '产品评测', icon: '📊', desc: '深度评测一个产品' },
-    { value: 'comparison', label: '产品对比', icon: '⚖️', desc: '对比两个或多个产品' },
-    { value: 'tutorial', label: '教程指南', icon: '📚', desc: '分步教程，如"如何使用V2Ray"' },
-    { value: 'resource', label: '资源分享', icon: '📦', desc: '分享付费资源或工具' }
-  ]
+    {
+      value: "recommendation",
+      label: "推荐文章",
+      icon: "⭐",
+      desc: '推荐多个产品，像"最好的VPS主机"',
+    },
+    {
+      value: "review",
+      label: "产品评测",
+      icon: "📊",
+      desc: "深度评测一个产品",
+    },
+    {
+      value: "comparison",
+      label: "产品对比",
+      icon: "⚖️",
+      desc: "对比两个或多个产品",
+    },
+    {
+      value: "tutorial",
+      label: "教程指南",
+      icon: "📚",
+      desc: '分步教程，如"如何使用V2Ray"',
+    },
+    {
+      value: "resource",
+      label: "资源分享",
+      icon: "📦",
+      desc: "分享付费资源或工具",
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -207,19 +302,21 @@ function Step1BasicInfo({ type, title, status, onTypeChange, onTitleChange, onSt
 
       {/* 类型选择 */}
       <div className="grid md:grid-cols-2 gap-4">
-        {typeOptions.map(option => (
+        {typeOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => onTypeChange(option.value)}
             className={`p-6 rounded-2xl border-2 text-left transition-all ${
               type === option.value
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? "border-blue-600 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">{option.icon}</span>
-              <span className="font-bold text-lg text-gray-900">{option.label}</span>
+              <span className="font-bold text-lg text-gray-900">
+                {option.label}
+              </span>
             </div>
             <p className="text-sm text-gray-600 ml-12">{option.desc}</p>
           </button>
@@ -241,7 +338,11 @@ function Step1BasicInfo({ type, title, status, onTypeChange, onTitleChange, onSt
         {title.length > 0 && (
           <p className="mt-2 text-sm text-green-600 flex items-center gap-2">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
             </svg>
             标题已填写
           </p>
@@ -265,11 +366,21 @@ function Step1BasicInfo({ type, title, status, onTypeChange, onTitleChange, onSt
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 // 步骤2：填写内容
-function Step2Content({ intro, mainContent, featuredImage, onIntroChange, onMainContentChange, onFeaturedImageChange, onOpenMedia, onNext, onBack }: any) {
+function Step2Content({
+  intro,
+  mainContent,
+  featuredImage,
+  onIntroChange,
+  onMainContentChange,
+  onFeaturedImageChange,
+  onOpenMedia,
+  onNext,
+  onBack,
+}: any) {
   return (
     <div className="space-y-6">
       {/* 引言 */}
@@ -305,7 +416,11 @@ function Step2Content({ intro, mainContent, featuredImage, onIntroChange, onMain
         />
         <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h6a1 1 0 001-1V9a1 1 0 100-2H9z" clipRule="evenodd" />
+            <path
+              fillRule="evenodd"
+              d="M18 10a8 8 0 11-16 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h6a1 1 0 001-1V9a1 1 0 100-2H9z"
+              clipRule="evenodd"
+            />
           </svg>
           <span>当前字数：{mainContent.length}</span>
           <span>•</span>
@@ -320,9 +435,13 @@ function Step2Content({ intro, mainContent, featuredImage, onIntroChange, onMain
         </label>
         {featuredImage ? (
           <div className="relative">
-            <img src={featuredImage} alt="封面" className="w-full h-64 object-cover rounded-xl" />
+            <img
+              src={featuredImage}
+              alt="封面"
+              className="w-full h-64 object-cover rounded-xl"
+            />
             <button
-              onClick={() => onFeaturedImageChange('')}
+              onClick={() => onFeaturedImageChange("")}
               className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
             >
               删除图片
@@ -334,11 +453,23 @@ function Step2Content({ intro, mainContent, featuredImage, onIntroChange, onMain
             className="w-full py-12 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-600 transition-colors"
           >
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
               <p className="text-lg text-gray-600">点击选择封面图片</p>
-              <p className="text-sm text-gray-400 mt-2">或者从媒体库拖拽图片到这里</p>
+              <p className="text-sm text-gray-400 mt-2">
+                或者从媒体库拖拽图片到这里
+              </p>
             </div>
           </button>
         )}
@@ -360,11 +491,21 @@ function Step2Content({ intro, mainContent, featuredImage, onIntroChange, onMain
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 // 步骤3：确认发布
-function Step3Review({ type, title, intro, featuredImage, status, onBack, onSave, onPublish, isSaving }: any) {
+function Step3Review({
+  type,
+  title,
+  intro,
+  featuredImage,
+  status,
+  onBack,
+  onSave,
+  onPublish,
+  isSaving,
+}: any) {
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -376,7 +517,11 @@ function Step3Review({ type, title, intro, featuredImage, status, onBack, onSave
       {/* 预览卡片 */}
       <div className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden shadow-lg">
         {featuredImage && (
-          <img src={featuredImage} alt="封面" className="w-full h-64 object-cover" />
+          <img
+            src={featuredImage}
+            alt="封面"
+            className="w-full h-64 object-cover"
+          />
         )}
         <div className="p-6">
           <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-3">
@@ -414,9 +559,24 @@ function Step3Review({ type, title, intro, featuredImage, status, onBack, onSave
       {isSaving && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
           <div className="flex items-center justify-center gap-3">
-            <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="animate-spin h-6 w-6 text-blue-600"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             <span className="text-blue-600 font-medium">正在保存中...</span>
           </div>
@@ -434,5 +594,5 @@ function Step3Review({ type, title, intro, featuredImage, status, onBack, onSave
         </button>
       </div>
     </div>
-  )
+  );
 }
