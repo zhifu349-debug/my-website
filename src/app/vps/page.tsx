@@ -1,27 +1,31 @@
-import { Metadata } from 'next'
-import { seoEngine } from '@/lib/seo-engine'
-import { mockRecommendationPage } from '@/lib/data/mock-data'
-import RecommendationTemplate from '@/components/templates/RecommendationTemplate'
+import { Metadata } from "next";
+import { seoEngine } from "@/lib/seo-engine";
+import { mockRecommendationPage } from "@/lib/data/mock-data";
+import RecommendationTemplate from "@/components/templates/RecommendationTemplate";
 
 // 生成SEO配置
-const seo = seoEngine.generateSEO('recommendation' as any, {
-  keyword: 'best vps',
-  category: 'VPS Hosting',
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/vps`
-})
+const seo = seoEngine.generateSEO("recommendation" as any, {
+  keyword: "best vps",
+  category: "VPS Hosting",
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/vps`,
+});
 
 // 生成Schema
-const schema = seoEngine.generateSchema('recommendation' as any, {
-  title: seo.title,
-  description: seo.description,
-  solutions: mockRecommendationPage.solutions
-}, '/vps')
+const schema = seoEngine.generateSchema(
+  "recommendation" as any,
+  {
+    title: seo.title,
+    description: seo.description,
+    solutions: mockRecommendationPage.solutions,
+  },
+  "/vps",
+);
 
 export const metadata: Metadata = {
   title: seo.title,
   description: seo.description,
   keywords: seo.keywords,
-}
+};
 
 export default function VPSPage() {
   return (
@@ -41,11 +45,12 @@ export default function VPSPage() {
             Best VPS Hosting 2026
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Our experts tested and ranked the top VPS providers to help you choose the best option
+            Our experts tested and ranked the top VPS providers to help you
+            choose the best option
           </p>
         </div>
       </div>
       <RecommendationTemplate data={mockRecommendationPage} />
     </>
-  )
+  );
 }
