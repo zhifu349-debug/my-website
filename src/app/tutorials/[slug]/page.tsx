@@ -1,27 +1,31 @@
-import { Metadata } from 'next'
-import { seoEngine } from '@/lib/seo-engine'
-import { mockTutorialPage } from '@/lib/data/mock-data'
-import TutorialTemplate from '@/components/templates/TutorialTemplate'
+import { Metadata } from "next";
+import { seoEngine } from "@/lib/seo-engine";
+import { mockTutorialPage } from "@/lib/data/mock-data";
+import TutorialTemplate from "@/components/templates/TutorialTemplate";
 
 // 生成SEO配置
-const seo = seoEngine.generateSEO('tutorial' as any, {
-  action: 'set up V2Ray',
-  keyword: 'v2ray setup',
-  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/tutorials/v2ray-setup`
-})
+const seo = seoEngine.generateSEO("tutorial" as any, {
+  action: "set up V2Ray",
+  keyword: "v2ray setup",
+  canonical: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/tutorials/v2ray-setup`,
+});
 
 // 生成HowTo Schema
-const howToSchema = seoEngine.generateSchema('tutorial' as any, {
-  title: seo.title,
-  description: seo.description,
-  steps: mockTutorialPage.steps
-}, '/tutorials/v2ray-setup')
+const howToSchema = seoEngine.generateSchema(
+  "tutorial" as any,
+  {
+    title: seo.title,
+    description: seo.description,
+    steps: mockTutorialPage.steps,
+  },
+  "/tutorials/v2ray-setup",
+);
 
 export const metadata: Metadata = {
   title: seo.title,
   description: seo.description,
   keywords: seo.keywords,
-}
+};
 
 export default function TutorialDynamicPage() {
   return (
@@ -42,5 +46,5 @@ export default function TutorialDynamicPage() {
       </div>
       <TutorialTemplate data={mockTutorialPage} />
     </>
-  )
+  );
 }
