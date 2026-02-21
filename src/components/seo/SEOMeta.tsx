@@ -1,9 +1,9 @@
-import Head from 'next/head'
-import { SEOConfig } from '@/types/seo'
+import Head from "next/head";
+import { SEOConfig } from "@/types/seo";
 
 interface SEOMetaProps {
-  seo: SEOConfig
-  schema?: any
+  seo: SEOConfig;
+  schema?: any;
 }
 
 export default function SEOMeta({ seo, schema }: SEOMetaProps) {
@@ -12,7 +12,7 @@ export default function SEOMeta({ seo, schema }: SEOMetaProps) {
       <title>{seo.title}</title>
       <meta name="description" content={seo.description} />
       {seo.keywords.length > 0 && (
-        <meta name="keywords" content={seo.keywords.join(', ')} />
+        <meta name="keywords" content={seo.keywords.join(", ")} />
       )}
       {seo.canonical && <link rel="canonical" href={seo.canonical} />}
       {seo.noindex && <meta name="robots" content="noindex" />}
@@ -31,5 +31,5 @@ export default function SEOMeta({ seo, schema }: SEOMetaProps) {
         />
       )}
     </Head>
-  )
+  );
 }
