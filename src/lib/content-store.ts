@@ -1,5 +1,4 @@
-// 本地内容存储（模拟数据库）
-// 在生产环境中，应该替换为真实的数据库（CloudBase/Supabase/MySQL等）
+// 内容存储（使用Supabase数据库）
 
 import {
   CMSContent,
@@ -8,17 +7,31 @@ import {
   Tag,
   ContentStatus,
 } from "./cms-types";
+import { createClient } from '@supabase/supabase-js';
+
+// 创建Supabase客户端
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase credentials not found. Using in-memory storage as fallback.');
+}
+
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // 内容存储
 class ContentStore {
+  // 内存存储作为备用
   private contents: Map<string, CMSContent> = new Map();
   private media: Map<string, MediaFile> = new Map();
   private categories: Map<string, Category> = new Map();
   private tags: Map<string, Tag> = new Map();
 
   constructor() {
-    // 初始化示例数据
-    this.initSampleData();
+    // 初始化示例数据（仅当使用内存存储时）
+    if (!supabase) {
+      this.initSampleData();
+    }
   }
 
   private initSampleData() {
@@ -75,27 +88,87 @@ class ContentStore {
   // ========== 内容管理 ==========
 
   async getAllContents(): Promise<CMSContent[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching contents:', error);
+        return [];
+      }
+      return data as CMSContent[];
+    }
     return Array.from(this.contents.values());
   }
 
   async getContentsByType(type: CMSContent["type"]): Promise<CMSContent[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .select('*')
+        .eq('type', type)
+        .order('createdAt', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching contents by type:', error);
+        return [];
+      }
+      return data as CMSContent[];
+    }
     return Array.from(this.contents.values()).filter((c) => c.type === type);
   }
 
   async getContentsByStatus(status: ContentStatus): Promise<CMSContent[]> {
-    return Array.from(this.contents.values()).filter(
-      (c) => c.status === status,
-    );
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .select('*')
+        .eq('status', status)
+        .order('createdAt', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching contents by status:', error);
+        return [];
+      }
+      return data as CMSContent[];
+    }
+    return Array.from(this.contents.values()).filter((c) => c.status === status);
   }
 
   async getContentById(id: string): Promise<CMSContent | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching content by id:', error);
+        return null;
+      }
+      return data as CMSContent;
+    }
     return this.contents.get(id) || null;
   }
 
   async getContentBySlug(slug: string): Promise<CMSContent | null> {
-    return (
-      Array.from(this.contents.values()).find((c) => c.slug === slug) || null
-    );
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching content by slug:', error);
+        return null;
+      }
+      return data as CMSContent;
+    }
+    return Array.from(this.contents.values()).find((c) => c.slug === slug) || null;
   }
 
   async createContent(
@@ -107,6 +180,23 @@ class ContentStore {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .insert(newContent)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating content:', error);
+        // 失败时回退到内存存储
+        this.contents.set(newContent.id, newContent);
+        return newContent;
+      }
+      return data as CMSContent;
+    }
+
     this.contents.set(newContent.id, newContent);
     return newContent;
   }
@@ -115,6 +205,21 @@ class ContentStore {
     id: string,
     updates: Partial<CMSContent>,
   ): Promise<CMSContent | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('contents')
+        .update({ ...updates, updatedAt: new Date() })
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating content:', error);
+        return null;
+      }
+      return data as CMSContent;
+    }
+
     const content = this.contents.get(id);
     if (!content) return null;
 
@@ -128,6 +233,19 @@ class ContentStore {
   }
 
   async deleteContent(id: string): Promise<boolean> {
+    if (supabase) {
+      const { error } = await supabase
+        .from('contents')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting content:', error);
+        return false;
+      }
+      return true;
+    }
+
     return this.contents.delete(id);
   }
 
@@ -141,10 +259,35 @@ class ContentStore {
   // ========== 媒体管理 ==========
 
   async getAllMedia(): Promise<MediaFile[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('media')
+        .select('*')
+        .order('uploadedAt', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching media:', error);
+        return [];
+      }
+      return data as MediaFile[];
+    }
     return Array.from(this.media.values());
   }
 
   async getMediaById(id: string): Promise<MediaFile | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('media')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching media by id:', error);
+        return null;
+      }
+      return data as MediaFile;
+    }
     return this.media.get(id) || null;
   }
 
@@ -156,6 +299,23 @@ class ContentStore {
       id: `media-${Date.now()}`,
       uploadedAt: new Date(),
     };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('media')
+        .insert(newMedia)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating media:', error);
+        // 失败时回退到内存存储
+        this.media.set(newMedia.id, newMedia);
+        return newMedia;
+      }
+      return data as MediaFile;
+    }
+
     this.media.set(newMedia.id, newMedia);
     return newMedia;
   }
@@ -164,6 +324,21 @@ class ContentStore {
     id: string,
     updates: Partial<MediaFile>,
   ): Promise<MediaFile | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('media')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating media:', error);
+        return null;
+      }
+      return data as MediaFile;
+    }
+
     const media = this.media.get(id);
     if (!media) return null;
 
@@ -173,18 +348,54 @@ class ContentStore {
   }
 
   async deleteMedia(id: string): Promise<boolean> {
+    if (supabase) {
+      const { error } = await supabase
+        .from('media')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting media:', error);
+        return false;
+      }
+      return true;
+    }
+
     return this.media.delete(id);
   }
 
   // ========== 类别管理 ==========
 
   async getAllCategories(): Promise<Category[]> {
-    return Array.from(this.categories.values()).sort(
-      (a, b) => a.order - b.order,
-    );
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('order', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+      }
+      return data as Category[];
+    }
+    return Array.from(this.categories.values()).sort((a, b) => a.order - b.order);
   }
 
   async getCategoryById(id: string): Promise<Category | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching category by id:', error);
+        return null;
+      }
+      return data as Category;
+    }
     return this.categories.get(id) || null;
   }
 
@@ -193,6 +404,23 @@ class ContentStore {
       ...category,
       id: `cat-${Date.now()}`,
     };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('categories')
+        .insert(newCategory)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating category:', error);
+        // 失败时回退到内存存储
+        this.categories.set(newCategory.id, newCategory);
+        return newCategory;
+      }
+      return data as Category;
+    }
+
     this.categories.set(newCategory.id, newCategory);
     return newCategory;
   }
@@ -201,6 +429,21 @@ class ContentStore {
     id: string,
     updates: Partial<Category>,
   ): Promise<Category | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('categories')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating category:', error);
+        return null;
+      }
+      return data as Category;
+    }
+
     const category = this.categories.get(id);
     if (!category) return null;
 
@@ -210,16 +453,54 @@ class ContentStore {
   }
 
   async deleteCategory(id: string): Promise<boolean> {
+    if (supabase) {
+      const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting category:', error);
+        return false;
+      }
+      return true;
+    }
+
     return this.categories.delete(id);
   }
 
   // ========== 标签管理 ==========
 
   async getAllTags(): Promise<Tag[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('count', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching tags:', error);
+        return [];
+      }
+      return data as Tag[];
+    }
     return Array.from(this.tags.values()).sort((a, b) => b.count - a.count);
   }
 
   async getTagById(id: string): Promise<Tag | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching tag by id:', error);
+        return null;
+      }
+      return data as Tag;
+    }
     return this.tags.get(id) || null;
   }
 
@@ -229,11 +510,43 @@ class ContentStore {
       id: `tag-${Date.now()}`,
       count: 0,
     };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('tags')
+        .insert(newTag)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating tag:', error);
+        // 失败时回退到内存存储
+        this.tags.set(newTag.id, newTag);
+        return newTag;
+      }
+      return data as Tag;
+    }
+
     this.tags.set(newTag.id, newTag);
     return newTag;
   }
 
   async updateTag(id: string, updates: Partial<Tag>): Promise<Tag | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('tags')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating tag:', error);
+        return null;
+      }
+      return data as Tag;
+    }
+
     const tag = this.tags.get(id);
     if (!tag) return null;
 
@@ -243,19 +556,48 @@ class ContentStore {
   }
 
   async deleteTag(id: string): Promise<boolean> {
+    if (supabase) {
+      const { error } = await supabase
+        .from('tags')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting tag:', error);
+        return false;
+      }
+      return true;
+    }
+
     return this.tags.delete(id);
   }
 
   // ========== 统计 ==========
 
   async getStats() {
+    if (supabase) {
+      // 这里应该使用数据库查询来获取统计数据
+      // 为了简单起见，我们先获取所有数据然后在客户端计算
+      const contents = await this.getAllContents();
+      const media = await this.getAllMedia();
+
+      return {
+        totalContents: contents.length,
+        publishedContents: contents.filter((c) => c.status === "published").length,
+        draftContents: contents.filter((c) => c.status === "draft").length,
+        totalMedia: media.length,
+        imagesCount: media.filter((m) => m.type === "image").length,
+        videosCount: media.filter((m) => m.type === "video").length,
+        totalStorage: media.reduce((sum, m) => sum + m.size, 0),
+      };
+    }
+
     const contents = Array.from(this.contents.values());
     const media = Array.from(this.media.values());
 
     return {
       totalContents: contents.length,
-      publishedContents: contents.filter((c) => c.status === "published")
-        .length,
+      publishedContents: contents.filter((c) => c.status === "published").length,
       draftContents: contents.filter((c) => c.status === "draft").length,
       totalMedia: media.length,
       imagesCount: media.filter((m) => m.type === "image").length,
