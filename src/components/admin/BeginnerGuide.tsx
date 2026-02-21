@@ -1,46 +1,51 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
 interface GuideStep {
-  title: string
-  description: string
-  icon: string
+  title: string;
+  description: string;
+  icon: string;
 }
 
 export default function BeginnerGuide() {
-  const [showGuide, setShowGuide] = useState(true)
-  const [currentStep, setCurrentStep] = useState(0)
+  const [showGuide, setShowGuide] = useState(true);
+  const [currentStep, setCurrentStep] = useState(0);
 
   const steps: GuideStep[] = [
     {
-      title: '欢迎使用内容管理系统！',
-      description: '这是一个专门为非技术人员设计的简单工具。只需3步，你就可以管理网站的所有内容。',
-      icon: '👋'
+      title: "欢迎使用内容管理系统！",
+      description:
+        "这是一个专门为非技术人员设计的简单工具。只需3步，你就可以管理网站的所有内容。",
+      icon: "👋",
     },
     {
-      title: '第1步：上传图片',
-      description: '点击【媒体库】标签，然后点击【上传图片/视频】按钮。你可以从电脑选择任何图片或视频文件，或者直接把文件拖进来。就是这么简单！',
-      icon: '📸'
+      title: "第1步：上传图片",
+      description:
+        "点击【媒体库】标签，然后点击【上传图片/视频】按钮。你可以从电脑选择任何图片或视频文件，或者直接把文件拖进来。就是这么简单！",
+      icon: "📸",
     },
     {
-      title: '第2步：写文章',
-      description: '点击【内容管理】标签，然后点击【+ 创建新内容】按钮。选择文章类型，填写标题，就可以开始写了。像用Word一样简单！',
-      icon: '✍️'
+      title: "第2步：写文章",
+      description:
+        "点击【内容管理】标签，然后点击【+ 创建新内容】按钮。选择文章类型，填写标题，就可以开始写了。像用Word一样简单！",
+      icon: "✍️",
     },
     {
-      title: '第3步：发布',
-      description: '写完文章后，点击【发布】按钮。文章就会立即出现在网站上，所有人都能看到了！',
-      icon: '🚀'
+      title: "第3步：发布",
+      description:
+        "写完文章后，点击【发布】按钮。文章就会立即出现在网站上，所有人都能看到了！",
+      icon: "🚀",
     },
     {
-      title: '你需要帮助吗？',
-      description: '如果在操作中遇到问题，随时查看右上角的【帮助】按钮。里面有详细的操作说明。',
-      icon: '❓'
-    }
-  ]
+      title: "你需要帮助吗？",
+      description:
+        "如果在操作中遇到问题，随时查看右上角的【帮助】按钮。里面有详细的操作说明。",
+      icon: "❓",
+    },
+  ];
 
-  if (!showGuide) return null
+  if (!showGuide) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -79,10 +84,10 @@ export default function BeginnerGuide() {
                 onClick={() => setCurrentStep(index)}
                 className={`w-3 h-3 rounded-full transition-all ${
                   index === currentStep
-                    ? 'bg-blue-600 w-8'
+                    ? "bg-blue-600 w-8"
                     : index < currentStep
-                    ? 'bg-green-500'
-                    : 'bg-gray-300'
+                      ? "bg-green-500"
+                      : "bg-gray-300"
                 }`}
               />
             ))}
@@ -107,7 +112,9 @@ export default function BeginnerGuide() {
               </button>
             ) : (
               <button
-                onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+                onClick={() =>
+                  setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
+                }
                 className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg transition-all"
               >
                 下一步 →
@@ -124,5 +131,5 @@ export default function BeginnerGuide() {
         </div>
       </div>
     </div>
-  )
+  );
 }
