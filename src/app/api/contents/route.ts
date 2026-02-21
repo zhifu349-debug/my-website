@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentStore } from "@/lib/content-store";
-import { CMSContent } from "@/lib/cms-types";
+import { CMSContent, ContentStatus } from "@/lib/cms-types";
 
 // GET /api/contents - 获取所有内容
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         type as CMSContent["type"],
       );
     } else if (status) {
-      contents = await contentStore.getContentsByStatus(status as any);
+      contents = await contentStore.getContentsByStatus(status as ContentStatus);
     } else {
       contents = await contentStore.getAllContents();
     }
