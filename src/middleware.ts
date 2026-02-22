@@ -11,7 +11,7 @@ ipRestriction.updateConfig({
   blockedIpRanges: process.env.BLOCKED_IP_RANGES?.split(",") || [],
   allowedCountries: process.env.ALLOWED_COUNTRIES?.split(",") || [],
   blockedCountries: process.env.BLOCKED_COUNTRIES?.split(",") || [],
-  enabled: process.env.NODE_ENV !== "development" // 开发环境禁用IP限制
+  enabled: false // 暂时禁用IP限制
 });
 
 // 从请求中获取IP地址
