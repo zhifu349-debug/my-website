@@ -34,7 +34,8 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const updatedContent = await contentStore.updateContent(id, body);
+    const { updatedBy = 'system', comment, ...updates } = body;
+    const updatedContent = await contentStore.updateContent(id, updates, updatedBy, comment);
 
     if (!updatedContent) {
       return NextResponse.json(
