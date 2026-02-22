@@ -200,6 +200,16 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({ contentId, onBack }) =>
                       查看
                     </button>
                     <button
+                      onClick={() => handleCompareVersion(version)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                        selectedVersion && selectedVersion.id === version.id
+                          ? 'bg-blue-200 text-blue-800'
+                          : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      }`}
+                    >
+                      {selectedVersion && selectedVersion.id === version.id ? '已选择' : '比较'}
+                    </button>
+                    <button
                       onClick={() => handleRollback(version)}
                       disabled={rollbackLoading}
                       className="px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-md text-sm font-medium hover:shadow transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -228,7 +238,7 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({ contentId, onBack }) =>
       </div>
 
       {/* 版本详情弹窗 */}
-      {selectedVersion && (
+      {selectedVersion && !showDiff && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
@@ -300,6 +310,141 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({ contentId, onBack }) =>
             <div className="p-6 border-t border-gray-200 flex justify-end">
               <button
                 onClick={closeVersionView}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 版本差异比较弹窗 */}
+      {showDiff && selectedVersion && compareVersion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">版本差异比较</h3>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleClearSelection}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    清除选择
+                  </button>
+                  <button
+                    onClick={handleCloseDiff}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                    版本 {selectedVersion.version}
+                  </span>
+                  <p className="text-sm text-gray-500 mt-1">
+                    创建于: {new Date(selectedVersion.createdAt).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    更新者: {selectedVersion.updatedBy}
+                  </p>
+                </div>
+                <div>
+                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                    版本 {compareVersion.version}
+                  </span>
+                  <p className="text-sm text-gray-500 mt-1">
+                    创建于: {new Date(compareVersion.createdAt).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    更新者: {compareVersion.updatedBy}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* 标题差异 */}
+              <div>
+                <h4 className="font-medium mb-3">标题差异</h4>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">英文标题</p>
+                    <div className="bg-gray-50 p-3 rounded-md text-sm">
+                      <div dangerouslySetInnerHTML={{ __html: getTextDiff(selectedVersion.title.en, compareVersion.title.en) }} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">中文标题</p>
+                    <div className="bg-gray-50 p-3 rounded-md text-sm">
+                      <div dangerouslySetInnerHTML={{ __html: getTextDiff(selectedVersion.title.zh, compareVersion.title.zh) }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 内容摘要差异 */}
+              <div>
+                <h4 className="font-medium mb-3">内容摘要差异</h4>
+                <div className="bg-gray-50 p-3 rounded-md text-sm">
+                  <div dangerouslySetInnerHTML={{ __html: getTextDiff(selectedVersion.content.en.intro, compareVersion.content.en.intro) }} />
+                </div>
+              </div>
+
+              {/* SEO信息差异 */}
+              <div>
+                <h4 className="font-medium mb-3">SEO信息差异</h4>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">SEO标题</p>
+                    <div className="bg-gray-50 p-3 rounded-md text-sm">
+                      <div dangerouslySetInnerHTML={{ __html: getTextDiff(selectedVersion.seo.title.en, compareVersion.seo.title.en) }} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">SEO描述</p>
+                    <div className="bg-gray-50 p-3 rounded-md text-sm">
+                      <div dangerouslySetInnerHTML={{ __html: getTextDiff(selectedVersion.seo.description.en.substring(0, 200), compareVersion.seo.description.en.substring(0, 200)) }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 状态差异 */}
+              <div>
+                <h4 className="font-medium mb-3">状态差异</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-md text-sm">
+                    <p className="text-gray-500">版本 {selectedVersion.version}:</p>
+                    <p className={`font-medium ${
+                      selectedVersion.status === 'published' ? 'text-green-600' : 
+                      selectedVersion.status === 'draft' ? 'text-yellow-600' : 'text-gray-600'
+                    }`}>
+                      {selectedVersion.status === 'published' ? '已发布' : 
+                       selectedVersion.status === 'draft' ? '草稿' : '归档'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-md text-sm">
+                    <p className="text-gray-500">版本 {compareVersion.version}:</p>
+                    <p className={`font-medium ${
+                      compareVersion.status === 'published' ? 'text-green-600' : 
+                      compareVersion.status === 'draft' ? 'text-yellow-600' : 'text-gray-600'
+                    }`}>
+                      {compareVersion.status === 'published' ? '已发布' : 
+                       compareVersion.status === 'draft' ? '草稿' : '归档'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={handleCloseDiff}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
               >
                 关闭
