@@ -6,6 +6,7 @@ import {
   Category,
   Tag,
   ContentStatus,
+  ContentVersion,
 } from "./cms-types";
 import { createClient } from '@supabase/supabase-js';
 
@@ -23,6 +24,7 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 class ContentStore {
   // 内存存储作为备用
   private contents: Map<string, CMSContent> = new Map();
+  private versions: Map<string, ContentVersion[]> = new Map();
   private media: Map<string, MediaFile> = new Map();
   private categories: Map<string, Category> = new Map();
   private tags: Map<string, Tag> = new Map();
@@ -204,7 +206,15 @@ class ContentStore {
   async updateContent(
     id: string,
     updates: Partial<CMSContent>,
+    updatedBy: string = 'system',
+    comment?: string,
   ): Promise<CMSContent | null> {
+    const oldContent = await this.getContentById(id);
+    if (!oldContent) return null;
+
+    // 创建版本记录
+    await this.createVersion(oldContent, updatedBy, comment);
+
     if (supabase) {
       const { data, error } = await supabase
         .from('contents')
@@ -220,16 +230,136 @@ class ContentStore {
       return data as CMSContent;
     }
 
-    const content = this.contents.get(id);
-    if (!content) return null;
-
     const updated = {
-      ...content,
+      ...oldContent,
       ...updates,
       updatedAt: new Date(),
     };
     this.contents.set(id, updated);
     return updated;
+  }
+
+  // 创建版本记录
+  private async createVersion(
+    content: CMSContent,
+    updatedBy: string,
+    comment?: string,
+  ): Promise<ContentVersion> {
+    // 获取当前最大版本号
+    const versions = await this.getContentVersions(content.id);
+    const nextVersion = versions.length > 0 ? Math.max(...versions.map(v => v.version)) + 1 : 1;
+
+    const version: ContentVersion = {
+      id: `version-${Date.now()}`,
+      contentId: content.id,
+      version: nextVersion,
+      title: content.title,
+      slug: content.slug,
+      status: content.status,
+      seo: content.seo,
+      content: content.content,
+      featuredImage: content.featuredImage,
+      gallery: content.gallery,
+      locale: content.locale,
+      author: content.author,
+      publishedAt: content.publishedAt,
+      createdAt: new Date(),
+      updatedBy,
+      comment,
+    };
+
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('content_versions')
+        .insert(version)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error creating version:', error);
+        // 失败时回退到内存存储
+        const contentVersions = this.versions.get(content.id) || [];
+        contentVersions.push(version);
+        this.versions.set(content.id, contentVersions);
+        return version;
+      }
+      return data as ContentVersion;
+    }
+
+    const contentVersions = this.versions.get(content.id) || [];
+    contentVersions.push(version);
+    this.versions.set(content.id, contentVersions);
+    return version;
+  }
+
+  // 获取内容的所有版本
+  async getContentVersions(contentId: string): Promise<ContentVersion[]> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('content_versions')
+        .select('*')
+        .eq('contentId', contentId)
+        .order('version', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching content versions:', error);
+        return [];
+      }
+      return data as ContentVersion[];
+    }
+    return this.versions.get(contentId) || [];
+  }
+
+  // 获取指定版本
+  async getContentVersionById(versionId: string): Promise<ContentVersion | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('content_versions')
+        .select('*')
+        .eq('id', versionId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching content version:', error);
+        return null;
+      }
+      return data as ContentVersion;
+    }
+    
+    // 在内存存储中查找
+    for (const versions of this.versions.values()) {
+      const version = versions.find(v => v.id === versionId);
+      if (version) return version;
+    }
+    return null;
+  }
+
+  // 版本回滚
+  async rollbackToVersion(
+    contentId: string,
+    versionId: string,
+    updatedBy: string = 'system',
+  ): Promise<CMSContent | null> {
+    const version = await this.getContentVersionById(versionId);
+    if (!version || version.contentId !== contentId) {
+      return null;
+    }
+
+    // 回滚内容
+    const updates: Partial<CMSContent> = {
+      title: version.title,
+      slug: version.slug,
+      status: version.status,
+      seo: version.seo,
+      content: version.content,
+      featuredImage: version.featuredImage,
+      gallery: version.gallery,
+      locale: version.locale,
+      author: version.author,
+      publishedAt: version.publishedAt,
+    };
+
+    return this.updateContent(contentId, updates, updatedBy, `Rolled back to version ${version.version}`);
   }
 
   async deleteContent(id: string): Promise<boolean> {
