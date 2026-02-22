@@ -21,12 +21,12 @@ export default function RecommendationTemplate({
     "Action",
   ];
 
-  const comparisonRows = data.solutions.map((solution) => ({
+  const comparisonRows = (data.solutions || []).map((solution) => ({
     feature: solution.name,
     values: [
       solution.price,
       `${solution.rating || "N/A"}/5`,
-      solution.bestFor[0] || "General Use",
+      (solution.bestFor && solution.bestFor.length > 0 ? solution.bestFor[0] : "General Use"),
       "",
     ],
   }));
@@ -52,7 +52,7 @@ export default function RecommendationTemplate({
               Common Pain Points
             </h3>
             <ul className="space-y-2">
-              {data.painPoints.map((point, index) => (
+              {(data.painPoints || []).map((point, index) => (
                 <li
                   key={index}
                   className="flex items-start gap-2 text-gray-700"
@@ -76,7 +76,7 @@ export default function RecommendationTemplate({
               Popular Use Cases
             </h3>
             <ul className="space-y-2">
-              {data.useCases.map((useCase, index) => (
+              {(data.useCases || []).map((useCase, index) => (
                 <li
                   key={index}
                   className="flex items-start gap-2 text-gray-700"
@@ -99,7 +99,7 @@ export default function RecommendationTemplate({
           <ComparisonTable headers={comparisonHeaders} rows={comparisonRows} />
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-6 border-t border-gray-200">
             <div className="flex flex-wrap gap-4 justify-center">
-              {data.solutions.map((solution, index) => (
+              {(data.solutions || []).map((solution, index) => (
                 <CTAButton
                   key={index}
                   href={solution.affiliateUrl}
@@ -119,7 +119,7 @@ export default function RecommendationTemplate({
           Detailed Reviews
         </h2>
         <div className="space-y-8">
-          {data.solutions.map((solution, index) => (
+          {(data.solutions || []).map((solution, index) => (
             <div
               key={index}
               className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow"
@@ -161,7 +161,7 @@ export default function RecommendationTemplate({
                     Pros
                   </h4>
                   <ul className="space-y-2">
-                    {solution.pros.map((pro, i) => (
+                    {(solution.pros || []).map((pro, i) => (
                       <li
                         key={i}
                         className="flex items-start gap-2 text-gray-700"
@@ -189,7 +189,7 @@ export default function RecommendationTemplate({
                     Cons
                   </h4>
                   <ul className="space-y-2">
-                    {solution.cons.map((con, i) => (
+                    {(solution.cons || []).map((con, i) => (
                       <li
                         key={i}
                         className="flex items-start gap-2 text-gray-700"
@@ -205,7 +205,7 @@ export default function RecommendationTemplate({
               <div className="mb-6">
                 <h4 className="font-bold text-gray-900 mb-3">Key Features</h4>
                 <div className="flex flex-wrap gap-2">
-                  {solution.features.map((feature, i) => (
+                  {(solution.features || []).map((feature, i) => (
                     <span
                       key={i}
                       className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
@@ -243,21 +243,21 @@ export default function RecommendationTemplate({
         <div className="space-y-6">
           <div className="bg-white/10 backdrop-blur rounded-xl p-6">
             <h3 className="font-bold text-lg mb-2">For Beginners:</h3>
-            <p className="text-white/90">{data.selectionGuide.beginners}</p>
+            <p className="text-white/90">{(data.selectionGuide || {}).beginners || "Choose the most user-friendly option with good documentation."}</p>
           </div>
           <div className="bg-white/10 backdrop-blur rounded-xl p-6">
             <h3 className="font-bold text-lg mb-2">For Advanced Users:</h3>
-            <p className="text-white/90">{data.selectionGuide.advanced}</p>
+            <p className="text-white/90">{(data.selectionGuide || {}).advanced || "Opt for the solution with the most features and customization options."}</p>
           </div>
           <div className="bg-white/10 backdrop-blur rounded-xl p-6">
             <h3 className="font-bold text-lg mb-2">For Special Needs:</h3>
-            <p className="text-white/90">{data.selectionGuide.specialNeeds}</p>
+            <p className="text-white/90">{(data.selectionGuide || {}).specialNeeds || "Select the solution that best addresses your specific requirements."}</p>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <FAQSection faqs={data.faqs} />
+      <FAQSection faqs={data.faqs || []} />
     </article>
   );
 }
