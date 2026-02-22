@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { userStore } from '@/lib/data/user-store';
 import { UpdateUserDto } from '@/types/user';
+import { apiSecurity } from '@/lib/security/api-security';
 
 // 验证请求是否来自已登录用户
 function validateRequest(request: NextRequest): boolean {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  return !!token;
+  return apiSecurity.validateAuth(request);
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!validateRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const user = userStore.getUserById(params.id);
+    const { id } = await params;
+    const user = userStore.getUserById(id);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -27,14 +28,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!validateRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const { id } = await params;
     const userData: UpdateUserDto = await request.json();
-    const updatedUser = userStore.updateUser(params.id, userData);
+    const updatedUser = userStore.updateUser(id, userData);
 
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -48,18 +50,19 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!validateRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const { id } = await params;
     // 不允许删除默认管理员
-    if (params.id === '1') {
+    if (id === '1') {
       return NextResponse.json({ error: 'Cannot delete default admin user' }, { status: 403 });
     }
 
-    const success = userStore.deleteUser(params.id);
+    const success = userStore.deleteUser(id);
     if (!success) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
