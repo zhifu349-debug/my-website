@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   CMSContent,
   CMSPageContent,
@@ -8,6 +8,7 @@ import {
   ContentStatus,
 } from "@/lib/cms-types";
 import MediaLibrary from "./MediaLibrary";
+import ContentPreview from "./ContentPreview";
 
 interface ContentEditorProps {
   content?: CMSContent;
@@ -28,6 +29,9 @@ export default function ContentEditor({
   const [slug, setSlug] = useState(content?.slug || "");
   const [status, setStatus] = useState<ContentStatus>(
     content?.status || "draft",
+  );
+  const [scheduledPublishAt, setScheduledPublishAt] = useState<Date | null>(
+    content?.scheduledPublishAt ? new Date(content.scheduledPublishAt) : null,
   );
   const [seoTitle, setSeoTitle] = useState({
     en: content?.seo.title.en || "",
@@ -53,6 +57,7 @@ export default function ContentEditor({
 
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const generateSlug = (text: string) => {
     return text
@@ -134,11 +139,16 @@ export default function ContentEditor({
   const handleSave = async (publish: boolean = false) => {
     setIsSaving(true);
 
+    let finalStatus: ContentStatus = publish ? "published" : "draft";
+    if (status === "scheduled" && scheduledPublishAt) {
+      finalStatus = "scheduled";
+    }
+
     const contentToSave: Partial<CMSContent> = {
       type,
       title,
       slug,
-      status: publish ? "published" : "draft",
+      status: finalStatus,
       seo: {
         title: seoTitle,
         description: seoDesc,
@@ -150,6 +160,10 @@ export default function ContentEditor({
       author: "admin",
       locale: "en",
     };
+
+    if (finalStatus === "scheduled" && scheduledPublishAt) {
+      contentToSave.scheduledPublishAt = scheduledPublishAt;
+    }
 
     try {
       await onSave(contentToSave);
@@ -219,10 +233,33 @@ export default function ContentEditor({
                 >
                   <option value="draft">草稿</option>
                   <option value="published">已发布</option>
+                  <option value="scheduled">定时发布</option>
                   <option value="archived">归档</option>
                 </select>
               </div>
             </div>
+
+            {/* 定时发布设置 */}
+            {status === "scheduled" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  定时发布时间
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledPublishAt ? scheduledPublishAt.toISOString().slice(0, 16) : ""}
+                  onChange={(e) => {
+                    const date = e.target.value ? new Date(e.target.value) : null;
+                    setScheduledPublishAt(date);
+                  }}
+                  min={new Date().toISOString().slice(0, 16)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  请选择未来的发布时间
+                </p>
+              </div>
+            )}
 
             {/* 标题 */}
             <div className="grid md:grid-cols-2 gap-6">
@@ -234,7 +271,7 @@ export default function ContentEditor({
                   type="text"
                   value={title.en}
                   onChange={(e) => handleTitleChange("en", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                   placeholder="Enter English title..."
                 />
               </div>
@@ -246,7 +283,7 @@ export default function ContentEditor({
                   type="text"
                   value={title.zh}
                   onChange={(e) => handleTitleChange("zh", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                   placeholder="输入中文标题..."
                 />
               </div>
@@ -265,7 +302,7 @@ export default function ContentEditor({
                   type="text"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-r-lg px-3 py-2"
+                  className="flex-1 border border-gray-300 rounded-r-lg px-3 py-2 text-gray-900"
                   placeholder="url-slug"
                 />
               </div>
@@ -283,6 +320,7 @@ export default function ContentEditor({
                       src={featuredImage}
                       alt="Featured"
                       className="w-full h-48 object-cover rounded-lg"
+                      loading="lazy"
                     />
                     <button
                       onClick={() => setFeaturedImage("")}
@@ -341,7 +379,7 @@ export default function ContentEditor({
                     onChange={(e) =>
                       setSeoTitle((prev) => ({ ...prev, en: e.target.value }))
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                     maxLength={60}
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -357,7 +395,7 @@ export default function ContentEditor({
                     onChange={(e) =>
                       setSeoDesc((prev) => ({ ...prev, en: e.target.value }))
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                     rows={2}
                     maxLength={160}
                   />
@@ -411,7 +449,7 @@ export default function ContentEditor({
                         },
                       }))
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                     rows={3}
                     placeholder="添加一段引言文字..."
                   />
@@ -494,7 +532,7 @@ export default function ContentEditor({
                               content: e.target.value,
                             })
                           }
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                           rows={4}
                           placeholder="输入文本内容..."
                         />
@@ -525,7 +563,7 @@ export default function ContentEditor({
                                 content: e.target.value,
                               })
                             }
-                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2"
+                            className="w-full mt-2 border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                             placeholder="图片URL"
                           />
                         </div>
@@ -539,7 +577,7 @@ export default function ContentEditor({
                               content: e.target.value,
                             })
                           }
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900"
                           rows={4}
                           placeholder="每行一个列表项"
                         />
@@ -566,6 +604,12 @@ export default function ContentEditor({
               取消
             </button>
             <button
+              onClick={() => setShowPreview(true)}
+              className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50"
+            >
+              预览
+            </button>
+            <button
               onClick={() => handleSave(false)}
               disabled={isSaving}
               className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50"
@@ -579,6 +623,15 @@ export default function ContentEditor({
             >
               {isSaving ? "发布中..." : "发布"}
             </button>
+            {status === "scheduled" && scheduledPublishAt && (
+              <button
+                onClick={() => handleSave(false)}
+                disabled={isSaving}
+                className="px-6 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg font-medium hover:shadow-lg disabled:opacity-50"
+              >
+                {isSaving ? "设置中..." : "设置定时发布"}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -620,6 +673,29 @@ export default function ContentEditor({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 预览模态框 */}
+      {showPreview && (
+        <ContentPreview
+          content={{
+            type,
+            title,
+            slug,
+            status,
+            seo: {
+              title: seoTitle,
+              description: seoDesc,
+              keywords: { en: "", zh: "" },
+              canonical: "",
+            },
+            content: pageContent,
+            featuredImage,
+            author: "admin",
+            locale: activeTab,
+          }}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </div>
   );
