@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentStore } from "@/lib/content-store";
+import { apiSecurity } from "@/lib/security/api-security";
 
 // GET /api/contents/[id] - 获取单个内容
 export async function GET(
@@ -32,6 +33,22 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // 验证认证
+    if (!apiSecurity.validateAuth(request)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
+    // 验证CSRF令牌
+    if (!apiSecurity.validateCsrfToken(request)) {
+      return NextResponse.json(
+        { success: false, error: "CSRF token validation failed" },
+        { status: 403 },
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { updatedBy = 'system', comment, ...updates } = body;
@@ -59,6 +76,22 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    // 验证认证
+    if (!apiSecurity.validateAuth(request)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
+    // 验证CSRF令牌
+    if (!apiSecurity.validateCsrfToken(request)) {
+      return NextResponse.json(
+        { success: false, error: "CSRF token validation failed" },
+        { status: 403 },
+      );
+    }
+
     const { id } = await params;
     const success = await contentStore.deleteContent(id);
 
