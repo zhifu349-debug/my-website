@@ -28,6 +28,34 @@ export interface CMSContent {
   createdAt: Date;
 }
 
+// 版本控制相关类型
+export interface ContentVersion {
+  id: string;
+  contentId: string;
+  version: number;
+  title: { en: string; zh: string };
+  slug: string;
+  status: ContentStatus;
+  seo: {
+    title: { en: string; zh: string };
+    description: { en: string; zh: string };
+    keywords: { en: string; zh: string };
+    canonical: string;
+  };
+  content: {
+    en: CMSPageContent;
+    zh: CMSPageContent;
+  };
+  featuredImage?: string;
+  gallery?: string[];
+  locale: "en" | "zh";
+  author: string;
+  publishedAt?: Date;
+  createdAt: Date;
+  updatedBy: string;
+  comment?: string;
+}
+
 export interface CMSPageContent {
   intro: string;
   sections: ContentSection[];
