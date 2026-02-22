@@ -7,19 +7,20 @@ function validateRequest(request: NextRequest): boolean {
   return !!token;
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!validateRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const { id } = await params;
     const { newPassword } = await request.json();
 
     if (!newPassword) {
       return NextResponse.json({ error: 'New password is required' }, { status: 400 });
     }
 
-    const updatedUser = userStore.updatePassword(params.id, newPassword);
+    const updatedUser = userStore.updatePassword(id, newPassword);
 
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -27,10 +28,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     // 记录密码重置活动
     userStore.addActivity({
-      userId: params.id,
+      userId: id,
       timestamp: new Date().toISOString(),
       action: 'password_reset',
-      ipAddress: request.ip || '127.0.0.1',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
       userAgent: request.headers.get('user-agent') || '',
       details: { initiatedBy: 'admin' }
     });
