@@ -37,6 +37,19 @@ export default function MediaLibrary({
   };
 
   const handleUpload = async (file: File) => {
+    // 检查文件大小
+    if (file.size > 10 * 1024 * 1024) {
+      alert("文件大小超过限制（最大10MB）");
+      return;
+    }
+
+    // 检查文件类型
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("不支持的文件类型，请上传JPG、PNG、GIF、WebP、MP4或WebM文件");
+      return;
+    }
+
     setIsUploading(true);
 
     const formData = new FormData();
@@ -53,10 +66,13 @@ export default function MediaLibrary({
 
       if (data.success) {
         await fetchMedia();
+        alert("文件上传成功！");
+      } else {
+        alert(`上传失败：${data.error || "未知错误"}`);
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("上传失败，请重试");
+      alert("上传失败，请检查网络连接后重试");
     } finally {
       setIsUploading(false);
     }
@@ -106,16 +122,20 @@ export default function MediaLibrary({
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (!confirm("确定要删除这个文件吗？")) return;
+    if (!confirm("确定要删除这个文件吗？此操作不可撤销。")) return;
 
     try {
       const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
       if (res.ok) {
         await fetchMedia();
+        alert("文件删除成功！");
+      } else {
+        const data = await res.json();
+        alert(`删除失败：${data.error || "未知错误"}`);
       }
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("删除失败，请重试");
+      alert("删除失败，请检查网络连接后重试");
     }
   };
 
@@ -213,7 +233,7 @@ export default function MediaLibrary({
           placeholder="搜索媒体..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 border border-gray-300 rounded-lg px-4 py-2"
+          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-gray-900"
         />
         <select
           value={filter}
@@ -243,9 +263,14 @@ export default function MediaLibrary({
                 src={item.url}
                 alt={item.alt}
                 className="w-full h-32 object-cover"
+                loading="lazy"
               />
             ) : (
-              <video src={item.url} className="w-full h-32 object-cover" />
+              <video 
+                src={item.url} 
+                className="w-full h-32 object-cover"
+                preload="metadata"
+              />
             )}
 
             {/* 悬浮操作 */}
