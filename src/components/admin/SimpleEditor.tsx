@@ -333,7 +333,7 @@ function Step1BasicInfo({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="例如：2026年最好的VPS主机推荐"
-          className="w-full text-xl px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+          className="w-full text-xl px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 focus:ring-4 focus:ring-blue-100 outline-none transition-all text-gray-900"
         />
         {title.length > 0 && (
           <p className="mt-2 text-sm text-green-600 flex items-center gap-2">
@@ -393,7 +393,7 @@ function Step2Content({
           onChange={(e) => onIntroChange(e.target.value)}
           placeholder="写一段简短的介绍，让读者知道这篇文章是关于什么的..."
           rows={3}
-          className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 outline-none transition-all resize-none"
+          className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 outline-none transition-all resize-none text-gray-900"
         />
       </div>
 
@@ -412,7 +412,7 @@ function Step2Content({
 • 可以随时保存，不会丢失
 • 支持复制粘贴其他文章"
           rows={12}
-          className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 outline-none transition-all resize-none text-base leading-relaxed"
+          className="w-full px-5 py-4 border-2 border-gray-300 rounded-xl focus:border-blue-600 outline-none transition-all resize-none text-base leading-relaxed text-gray-900"
         />
         <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -439,6 +439,7 @@ function Step2Content({
               src={featuredImage}
               alt="封面"
               className="w-full h-64 object-cover rounded-xl"
+              loading="lazy"
             />
             <button
               onClick={() => onFeaturedImageChange("")}
@@ -521,6 +522,7 @@ function Step3Review({
             src={featuredImage}
             alt="封面"
             className="w-full h-64 object-cover"
+            loading="lazy"
           />
         )}
         <div className="p-6">
