@@ -113,6 +113,27 @@ const VersionHistory: React.FC<VersionHistoryProps> = ({ contentId, onBack }) =>
     setSelectedVersion(null);
   };
 
+  const handleCompareVersion = (version: ContentVersion) => {
+    if (!selectedVersion) {
+      setSelectedVersion(version);
+      alert('请选择另一个版本进行比较');
+    } else {
+      setCompareVersion(version);
+      setShowDiff(true);
+    }
+  };
+
+  const handleCloseDiff = () => {
+    setShowDiff(false);
+    setCompareVersion(null);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedVersion(null);
+    setCompareVersion(null);
+    setShowDiff(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
