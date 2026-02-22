@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { userStore } from '@/lib/data/user-store';
 import { CreateUserDto, UpdateUserDto } from '@/types/user';
+import { apiSecurity } from '@/lib/security/api-security';
 
 // 验证请求是否来自已登录用户
 function validateRequest(request: NextRequest): boolean {
-  const token = request.headers.get('authorization')?.replace('Bearer ', '');
-  return !!token;
+  return apiSecurity.validateAuth(request);
 }
 
 export async function GET(request: NextRequest) {
