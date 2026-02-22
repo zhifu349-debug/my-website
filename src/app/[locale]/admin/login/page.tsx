@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { userStore } from '@/lib/data/user-store'
 
 export default function AdminLoginPage() {
 
@@ -12,33 +13,71 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  // 默认管理员凭证（生产环境应使用环境变量或数据库存储）
-  const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123'
-  }
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setIsLoading(true)
 
     try {
+      // 获取客户端信息
+      const ipAddress = await getClientIp()
+      const userAgent = navigator.userAgent
+
       // 验证凭证
-      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      const user = userStore.getUserByUsername(username)
+      
+      if (user && user.password === password && user.status === 'active') {
+        // 更新最后登录时间
+        userStore.updateLastLogin(user.id)
+        
+        // 记录登录成功历史
+        userStore.addLoginHistory({
+          userId: user.id,
+          timestamp: new Date().toISOString(),
+          ipAddress,
+          userAgent,
+          status: 'success'
+        })
+
         // 生成并存储token
         const token = btoa(`${username}:${Date.now()}`)
         localStorage.setItem('adminToken', token)
+        localStorage.setItem('currentUser', JSON.stringify({ id: user.id, username: user.username, role: user.role }))
         
         // 登录成功，重定向到管理后台
         router.push('/zh/admin')
       } else {
+        // 记录登录失败历史
+        const existingUser = userStore.getUserByUsername(username)
+        if (existingUser) {
+          userStore.addLoginHistory({
+            userId: existingUser.id,
+            timestamp: new Date().toISOString(),
+            ipAddress: await getClientIp(),
+            userAgent: navigator.userAgent,
+            status: 'failed',
+            errorMessage: '密码错误'
+          })
+        }
         setError('用户名或密码错误')
       }
-    } catch {
+    } catch (err) {
+      console.error('登录错误:', err)
       setError('登录失败，请重试')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // 获取客户端IP地址（模拟）
+  const getClientIp = async (): Promise<string> => {
+    try {
+      // 在实际生产环境中，应该从服务器获取真实IP
+      const response = await fetch('https://api.ipify.org?format=json')
+      const data = await response.json()
+      return data.ip
+    } catch {
+      return '127.0.0.1'
     }
   }
 
