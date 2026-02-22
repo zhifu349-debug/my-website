@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { userStore } from '@/lib/data/user-store'
+import { CaptchaUtils, loginAttemptLimiter } from '@/lib/security/security-utils'
 
 export default function AdminLoginPage() {
 
@@ -10,8 +11,22 @@ export default function AdminLoginPage() {
   
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [captcha, setCaptcha] = useState('')
+  const [generatedCaptcha, setGeneratedCaptcha] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // 生成初始验证码
+  useEffect(() => {
+    generateNewCaptcha()
+  }, [])
+
+  // 生成新的验证码
+  const generateNewCaptcha = () => {
+    const newCaptcha = CaptchaUtils.generateCaptcha()
+    setGeneratedCaptcha(newCaptcha)
+    setCaptcha('')
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,14 +34,36 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
+      // 验证输入
+      if (!username || !password || !captcha) {
+        setError('请填写所有必填字段')
+        return
+      }
+
       // 获取客户端信息
       const ipAddress = await getClientIp()
       const userAgent = navigator.userAgent
+
+      // 检查是否被锁定
+      if (loginAttemptLimiter.isLocked(username, ipAddress)) {
+        setError('登录失败次数过多，请15分钟后再试')
+        return
+      }
+
+      // 验证验证码
+      if (!CaptchaUtils.verifyCaptcha(captcha, generatedCaptcha)) {
+        setError('验证码错误')
+        generateNewCaptcha()
+        return
+      }
 
       // 验证凭证
       const user = userStore.getUserByUsername(username)
       
       if (user && user.password === password && user.status === 'active') {
+        // 重置登录尝试计数
+        loginAttemptLimiter.resetAttempts(username, ipAddress)
+        
         // 更新最后登录时间
         userStore.updateLastLogin(user.id)
         
@@ -47,6 +84,9 @@ export default function AdminLoginPage() {
         // 登录成功，重定向到管理后台
         router.push('/zh/admin')
       } else {
+        // 记录登录尝试
+        const isLocked = loginAttemptLimiter.recordAttempt(username, ipAddress)
+        
         // 记录登录失败历史
         const existingUser = userStore.getUserByUsername(username)
         if (existingUser) {
@@ -59,11 +99,22 @@ export default function AdminLoginPage() {
             errorMessage: '密码错误'
           })
         }
-        setError('用户名或密码错误')
+        
+        if (isLocked) {
+          setError('登录失败次数过多，请15分钟后再试')
+        } else {
+          const remainingAttempts = loginAttemptLimiter.getRemainingAttempts(username, ipAddress)
+          setError(`用户名或密码错误，剩余尝试次数：${remainingAttempts}`)
+        }
+        
+        // 生成新的验证码
+        generateNewCaptcha()
       }
     } catch (err) {
       console.error('登录错误:', err)
       setError('登录失败，请重试')
+      // 生成新的验证码
+      generateNewCaptcha()
     } finally {
       setIsLoading(false)
     }
@@ -124,7 +175,7 @@ export default function AdminLoginPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
           </div>
@@ -142,9 +193,36 @@ export default function AdminLoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="captcha" className="block text-sm font-medium text-gray-700">
+              验证码
+            </label>
+            <div className="mt-1 flex space-x-2">
+              <input
+                id="captcha"
+                name="captcha"
+                type="text"
+                required
+                value={captcha}
+                onChange={(e) => setCaptcha(e.target.value)}
+                className="appearance-none block flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="请输入验证码"
+              />
+              <div className="flex-shrink-0">
+                <div 
+                  className="w-32 h-10 bg-gray-100 border border-gray-300 rounded-md flex items-center justify-center cursor-pointer select-none"
+                  onClick={generateNewCaptcha}
+                >
+                  <span className="text-gray-700 font-mono">{generatedCaptcha}</span>
+                </div>
+              </div>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">点击验证码可刷新</p>
           </div>
 
           <div>
