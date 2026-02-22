@@ -6,7 +6,8 @@ import { User, UserLoginHistory, UserActivity } from '@/types/user'
 
 export default function UserDetailPage() {
   const router = useRouter()
-  const { id } = useParams<{ id: string }>()
+  const params = useParams<{ id: string }>()
+  const id = params?.id
   const [user, setUser] = useState<User | null>(null)
   const [loginHistories, setLoginHistories] = useState<UserLoginHistory[]>([])
   const [activities, setActivities] = useState<UserActivity[]>([])
