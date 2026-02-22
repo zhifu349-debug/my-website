@@ -1,6 +1,6 @@
 // CMS内容类型定义
 
-export type ContentStatus = "draft" | "published" | "archived";
+export type ContentStatus = "draft" | "published" | "archived" | "scheduled";
 export type MediaType = "image" | "video" | "document";
 
 export interface CMSContent {
@@ -24,6 +24,7 @@ export interface CMSContent {
   locale: "en" | "zh";
   author: string;
   publishedAt?: Date;
+  scheduledPublishAt?: Date;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -51,6 +52,7 @@ export interface ContentVersion {
   locale: "en" | "zh";
   author: string;
   publishedAt?: Date;
+  scheduledPublishAt?: Date;
   createdAt: Date;
   updatedBy: string;
   comment?: string;
