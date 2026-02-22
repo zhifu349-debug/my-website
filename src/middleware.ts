@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { locales, defaultLocale, type Locale } from "@/lib/i18n-config";
+import { ipRestriction } from "@/lib/security/ip-restriction";
 
-// 允许访问的IP地址列表
-const ALLOWED_IPS = process.env.ALLOWED_IPS?.split(",") || ["127.0.0.1", "::1"];
-
-// 检查IP是否被允许
-function isIpAllowed(ip: string): boolean {
-  // 开发环境允许所有IP
-  if (process.env.NODE_ENV === "development") {
-    return true;
-  }
-  return ALLOWED_IPS.includes(ip);
-}
+// 配置IP限制
+ipRestriction.updateConfig({
+  allowedIps: process.env.ALLOWED_IPS?.split(",") || ["127.0.0.1", "::1"],
+  allowedIpRanges: process.env.ALLOWED_IP_RANGES?.split(",") || [],
+  blockedIps: process.env.BLOCKED_IPS?.split(",") || [],
+  blockedIpRanges: process.env.BLOCKED_IP_RANGES?.split(",") || [],
+  allowedCountries: process.env.ALLOWED_COUNTRIES?.split(",") || [],
+  blockedCountries: process.env.BLOCKED_COUNTRIES?.split(",") || [],
+  enabled: process.env.NODE_ENV !== "development" // 开发环境禁用IP限制
+});
 
 // 从请求中获取IP地址
 function getClientIp(request: NextRequest): string {
@@ -29,13 +29,14 @@ function getClientIp(request: NextRequest): string {
   return url.hostname;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // 检查IP访问限制（仅对管理后台和API路由）
   if (pathname.includes("/admin") || pathname.startsWith("/api")) {
     const clientIp = getClientIp(request);
-    if (!isIpAllowed(clientIp)) {
+    const isAllowed = await ipRestriction.isAllowed(clientIp);
+    if (!isAllowed) {
       return NextResponse.json(
         { success: false, error: "Access denied: IP not allowed" },
         { status: 403 }
