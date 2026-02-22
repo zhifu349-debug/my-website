@@ -7,14 +7,15 @@ function validateRequest(request: NextRequest): boolean {
   return !!token;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!validateRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const { id } = await params;
     const limit = request.nextUrl.searchParams.get('limit') ? parseInt(request.nextUrl.searchParams.get('limit')!) : 50;
-    const loginHistories = userStore.getLoginHistories(params.id, limit);
+    const loginHistories = userStore.getLoginHistories(id, limit);
     return NextResponse.json({ success: true, data: loginHistories });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
