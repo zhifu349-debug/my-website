@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, CreateUserDto, UpdateUserDto } from '@/types/user'
+import { sensitiveActionValidator } from '@/lib/security/security-utils'
 
 interface CurrentUser {
   id: string
@@ -19,13 +20,16 @@ export default function UserManagementPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showSensitiveActionConfirm, setShowSensitiveActionConfirm] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedAction, setSelectedAction] = useState<string>('')
   const [formData, setFormData] = useState<CreateUserDto | UpdateUserDto>({
     username: '',
     email: '',
     password: '',
     role: 'editor'
   })
+  const [actionToken, setActionToken] = useState<string>('')
 
   // 获取当前登录用户
   useEffect(() => {
@@ -133,7 +137,15 @@ export default function UserManagementPage() {
 
   // 处理删除用户
   const handleDeleteUser = async () => {
-    if (!selectedUser) return
+    if (!selectedUser || !currentUser) return
+    
+    // 验证敏感操作令牌
+    const isValidToken = sensitiveActionValidator.validateActionToken(currentUser.id, 'delete_user', actionToken)
+    if (!isValidToken) {
+      setError('操作已过期，请重新尝试')
+      setShowSensitiveActionConfirm(false)
+      return
+    }
     
     setIsLoading(true)
     try {
@@ -148,7 +160,7 @@ export default function UserManagementPage() {
       const data = await response.json()
       if (data.success) {
         setUsers(users.filter(user => user.id !== selectedUser.id))
-        setShowDeleteConfirm(false)
+        setShowSensitiveActionConfirm(false)
       } else {
         setError(data.error || 'Failed to delete user')
       }
@@ -209,7 +221,13 @@ export default function UserManagementPage() {
   // 打开删除确认模态框
   const openDeleteConfirm = (user: User) => {
     setSelectedUser(user)
-    setShowDeleteConfirm(true)
+    setSelectedAction('delete_user')
+    // 生成敏感操作令牌
+    if (currentUser) {
+      const token = sensitiveActionValidator.generateActionToken(currentUser.id, 'delete_user')
+      setActionToken(token)
+    }
+    setShowSensitiveActionConfirm(true)
   }
 
   // 重置表单
@@ -236,7 +254,18 @@ export default function UserManagementPage() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">用户管理</h1>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/zh/admin')}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回管理中心
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">用户管理</h1>
+        </div>
         <button
           onClick={openCreateModal}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -328,7 +357,7 @@ export default function UserManagementPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '-'
+                    {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(user.createdAt).toLocaleString()}
@@ -395,7 +424,7 @@ export default function UserManagementPage() {
                 <input
                   type="password"
                   name="password"
-                  value={formData.password}
+                  value={(formData as any).password}
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -482,7 +511,7 @@ export default function UserManagementPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">状态</label>
                 <select
                   name="status"
-                  value={formData.status}
+                  value={(formData as any).status}
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -513,15 +542,20 @@ export default function UserManagementPage() {
         </div>
       )}
 
-      {/* 删除确认模态框 */}
-      {showDeleteConfirm && selectedUser && (
+      {/* 敏感操作二次验证模态框 */}
+      {showSensitiveActionConfirm && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">确认删除</h2>
-            <p className="mb-6">您确定要删除用户 <span className="font-medium">{selectedUser.username}</span> 吗？此操作不可撤销。</p>
+            <h2 className="text-xl font-bold mb-4">敏感操作确认</h2>
+            <p className="mb-6">
+              您正在执行敏感操作：删除用户 <span className="font-medium">{selectedUser.username}</span>
+              <br />
+              <br />
+              此操作不可撤销，请再次确认您的身份。
+            </p>
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowDeleteConfirm(false)}
+                onClick={() => setShowSensitiveActionConfirm(false)}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 取消
@@ -531,7 +565,7 @@ export default function UserManagementPage() {
                 disabled={isLoading}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? '删除中...' : '删除'}
+                {isLoading ? '执行中...' : '确认执行'}
               </button>
             </div>
           </div>
