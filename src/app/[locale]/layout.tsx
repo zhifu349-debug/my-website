@@ -33,14 +33,12 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale} className="scroll-smooth">
-      <body className={inter.className}>
-        <I18nProvider initialLocale={locale as Locale}>
-          <Navigation />
-          <main className="min-h-screen pt-16">{children}</main>
-          <Footer />
-        </I18nProvider>
-      </body>
-    </html>
+    <>
+      <I18nProvider initialLocale={locale as Locale}>
+        <Navigation />
+        <main className="min-h-screen pt-16">{children}</main>
+        <Footer />
+      </I18nProvider>
+    </>
   );
 }
