@@ -236,3 +236,5 @@ export default async function VPSPage({ params }: VPSPageProps) {
     </>
   );
 }
+
+export const dynamic = 'force-dynamic';

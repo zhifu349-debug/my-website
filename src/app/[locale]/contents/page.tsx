@@ -170,3 +170,5 @@ export default async function ContentsPage({ params }: ContentsPageProps) {
     </div>
   );
 }
+
+export const dynamic = 'force-dynamic';
