@@ -11,11 +11,14 @@ class UserStore {
   }
 
   private initializeDefaultUser() {
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    
     const defaultAdmin: User = {
       id: '1',
-      username: 'admin',
+      username: adminUsername,
       email: 'admin@example.com',
-      password: 'admin123', // 生产环境应该使用哈希密码
+      password: adminPassword,
       role: 'admin',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
