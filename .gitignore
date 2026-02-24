@@ -39,3 +39,5 @@ next-env.d.ts
 .idea
 *.swp
 *.swo
+*.env.local
+scripts/create-content-model.ts
