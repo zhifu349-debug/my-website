@@ -284,7 +284,7 @@ docker-compose --version
 ## Core Concepts
 
 ### Images
-Images are read-only templates used to create containers. Think of them as blueprints.
+Images are read-only templates used to create containers.
 
 \`\`\`bash
 # Pull an image
@@ -383,8 +383,6 @@ USER appuser
 node_modules
 npm-debug.log
 .git
-.gitignore
-README.md
 .env
 \`\`\`
 
@@ -406,26 +404,6 @@ docker service scale myapp_web=5
 \`\`\`bash
 # Scan for vulnerabilities
 docker scan myapp:1.0
-
-# Run with security options
-docker run --read-only --tmpfs /tmp myapp:1.0
-\`\`\`
-
-## Monitoring
-
-### Health Checks
-\`\`\`dockerfile
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\
-  CMD curl -f http://localhost:3000/health || exit 1
-\`\`\`
-
-### Logging
-\`\`\`bash
-# View logs
-docker logs -f container_name
-
-# JSON logging driver
-docker run --log-driver=json-file --log-opt max-size=10m myapp:1.0
 \`\`\`
 `,
       zh: `# Docker 容器部署实战
@@ -452,7 +430,7 @@ docker-compose --version
 ## 核心概念
 
 ### 镜像
-镜像是用于创建容器的只读模板。将其视为蓝图。
+镜像是用于创建容器的只读模板。
 
 \`\`\`bash
 # 拉取镜像
@@ -551,8 +529,6 @@ USER appuser
 node_modules
 npm-debug.log
 .git
-.gitignore
-README.md
 .env
 \`\`\`
 
@@ -574,26 +550,6 @@ docker service scale myapp_web=5
 \`\`\`bash
 # 扫描漏洞
 docker scan myapp:1.0
-
-# 使用安全选项运行
-docker run --read-only --tmpfs /tmp myapp:1.0
-\`\`\`
-
-## 监控
-
-### 健康检查
-\`\`\`dockerfile
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\
-  CMD curl -f http://localhost:3000/health || exit 1
-\`\`\`
-
-### 日志
-\`\`\`bash
-# 查看日志
-docker logs -f container_name
-
-# JSON 日志驱动
-docker run --log-driver=json-file --log-opt max-size=10m myapp:1.0
 \`\`\`
 `,
     },
@@ -702,21 +658,6 @@ const Button = React.memo(function Button({ onClick, children }) {
 });
 \`\`\`
 
-### useWhyDidYouUpdate Hook
-\`\`\`tsx
-function useWhyDidYouUpdate(props) {
-  const previousProps = useRef({});
-  useEffect(() => {
-    Object.keys(props).forEach(key => {
-      if (previousProps.current[key] !== props[key]) {
-        console.log('props changed:', key, previousProps.current[key], props[key]);
-      }
-    });
-    previousProps.current = props;
-  });
-}
-\`\`\`
-
 ## 5. Image Optimization
 
 ### Next.js Image
@@ -731,75 +672,10 @@ function MyPage() {
       width={1200}
       height={600}
       priority
-      placeholder="blur"
-      blurDataURL="data:..."
     />
   );
 }
 \`\`\`
-
-### Lazy Loading Images
-\`\`\`tsx
-<img loading="lazy" src="image.jpg" alt="..." />
-\`\`\`
-
-## 6. Bundle Analysis
-
-### webpack-bundle-analyzer
-\`\`\`bash
-npm install --save-dev webpack-bundle-analyzer
-\`\`\`
-
-\`\`\`javascript
-// next.config.js
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
-
-module.exports = withBundleAnalyzer({
-  // other config
-});
-\`\`\`
-
-## 7. State Management
-
-### Colocate State
-\`\`\`tsx
-// Bad - Lifted state causes unnecessary re-renders
-function Parent() {
-  const [count, setCount] = useState(0);
-  return (
-    <>
-      <ExpensiveChild />
-      <Button onClick={() => setCount(c => c + 1)} />
-    </>
-  );
-}
-
-// Good - Colocated state
-function Parent() {
-  return (
-    <>
-      <ExpensiveChild />
-      <Counter />
-    </>
-  );
-}
-
-function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-}
-\`\`\`
-
-## 8. Profiling
-
-### React DevTools Profiler
-1. Install React DevTools
-2. Open DevTools → Profiler tab
-3. Click "Record"
-4. Interact with your app
-5. Analyze the flamegraph
 
 ## Performance Checklist
 - [ ] Use production build
@@ -809,7 +685,6 @@ function Counter() {
 - [ ] Use CDN
 - [ ] Enable caching
 - [ ] Monitor Core Web Vitals
-- [ ] Set performance budgets
 `,
       zh: `# React 性能优化指南
 
@@ -913,59 +788,10 @@ function MyPage() {
       width={1200}
       height={600}
       priority
-      placeholder="blur"
-      blurDataURL="data:..."
     />
   );
 }
 \`\`\`
-
-## 6. 包分析
-
-### webpack-bundle-analyzer
-\`\`\`bash
-npm install --save-dev webpack-bundle-analyzer
-\`\`\`
-
-## 7. 状态管理
-
-### 状态共置
-\`\`\`tsx
-// 不好 - 提升状态导致不必要的重渲染
-function Parent() {
-  const [count, setCount] = useState(0);
-  return (
-    <>
-      <ExpensiveChild />
-      <Button onClick={() => setCount(c => c + 1)} />
-    </>
-  );
-}
-
-// 好 - 状态共置
-function Parent() {
-  return (
-    <>
-      <ExpensiveChild />
-      <Counter />
-    </>
-  );
-}
-
-function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
-}
-\`\`\`
-
-## 8. 性能分析
-
-### React DevTools Profiler
-1. 安装 React DevTools
-2. 打开 DevTools → Profiler 标签
-3. 点击 "Record"
-4. 与应用交互
-5. 分析火焰图
 
 ## 性能检查清单
 - [ ] 使用生产构建
@@ -975,13 +801,172 @@ function Counter() {
 - [ ] 使用 CDN
 - [ ] 启用缓存
 - [ ] 监控 Core Web Vitals
-- [ ] 设置性能预算
 `,
     },
     category: { en: "Frontend Development", zh: "前端开发" },
     difficulty: "Advanced",
     time: { en: "75 min", zh: "75 分钟" },
     icon: "⚛️",
+    updated: "2026-02-24",
+  },
+  "nginx-setup": {
+    id: "nginx-setup",
+    title: {
+      en: "Nginx Setup & Configuration Masterclass",
+      zh: "Nginx 配置与优化精通",
+    },
+    description: {
+      en: "Learn to configure Nginx as reverse proxy, load balancer, and web server. Includes SSL, caching, and performance tuning.",
+      zh: "学习将 Nginx 配置为反向代理、负载均衡器和 Web 服务器。包括 SSL、缓存和性能调优。",
+    },
+    content: {
+      en: `# Nginx Setup & Configuration Masterclass
+
+## Installation
+\`\`\`bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install nginx
+
+# Verify
+nginx -v
+\`\`\`
+
+## Basic Configuration
+
+### as Reverse Proxy
+\`\`\`nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+\`\`\`
+
+## SSL Configuration
+
+### with Let's Encrypt
+\`\`\`bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d example.com -d www.example.com
+\`\`\`
+
+## Performance Optimization
+
+### Gzip Compression
+\`\`\`nginx
+gzip on;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+gzip_min_length 1000;
+\`\`\`
+
+### Caching
+\`\`\`nginx
+location ~* \\.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 30d;
+    add_header Cache-Control "public, no-transform";
+}
+\`\`\`
+
+## Load Balancing
+\`\`\`nginx
+upstream backend {
+    server backend1.example.com;
+    server backend2.example.com;
+    server backend3.example.com;
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+\`\`\`
+`,
+      zh: `# Nginx 配置与优化精通
+
+## 安装
+\`\`\`bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install nginx
+
+# 验证
+nginx -v
+\`\`\`
+
+## 基础配置
+
+### 作为反向代理
+\`\`\`nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+\`\`\`
+
+## SSL 配置
+
+### 使用 Let's Encrypt
+\`\`\`bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d example.com -d www.example.com
+\`\`\`
+
+## 性能优化
+
+### Gzip 压缩
+\`\`\`nginx
+gzip on;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+gzip_min_length 1000;
+\`\`\`
+
+### 缓存
+\`\`\`nginx
+location ~* \\.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 30d;
+    add_header Cache-Control "public, no-transform";
+}
+\`\`\`
+
+## 负载均衡
+\`\`\`nginx
+upstream backend {
+    server backend1.example.com;
+    server backend2.example.com;
+    server backend3.example.com;
+}
+
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+\`\`\`
+`,
+    },
+    category: { en: "Server Configuration", zh: "服务器配置" },
+    difficulty: "Intermediate",
+    time: { en: "50 min", zh: "50 分钟" },
+    icon: "⚙️",
     updated: "2026-02-24",
   },
 };
