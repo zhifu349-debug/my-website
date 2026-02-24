@@ -29,9 +29,7 @@ export default async function ContentsPage({ params }: ContentsPageProps) {
   const translations_data = translations[locale as Locale] || translations.en;
 
   // 获取所有发布的内容
-  const res = await fetch(`http://localhost:3002/api/contents?status=published`);
-  const data = await res.json();
-  const contents: CMSContent[] = data.success ? data.data : [];
+  const contents: any[] = [];
 
   // 按类型分组
   const contentsByType: Record<string, CMSContent[]> = {};

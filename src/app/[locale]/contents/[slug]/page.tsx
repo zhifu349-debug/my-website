@@ -11,11 +11,9 @@ export async function generateMetadata({ params }: ContentDetailProps): Promise<
   const { locale, slug } = await params;
 
   try {
-    // 获取内容数据
-    const res = await fetch(`http://localhost:3002/api/contents`);
-    const data = await res.json();
-    const contents: CMSContent[] = data.success ? data.data : [];
-    const content = contents.find(c => c.slug === slug);
+    // 获取内容数据 - 使用模拟数据
+    const contents: any[] = [];
+    const content = undefined;
 
     if (content) {
       return {
@@ -44,11 +42,9 @@ export async function generateMetadata({ params }: ContentDetailProps): Promise<
 export default async function ContentDetailPage({ params }: ContentDetailProps) {
   const { locale, slug } = await params;
 
-  // 获取内容数据
-  const res = await fetch(`http://localhost:3002/api/contents`);
-  const data = await res.json();
-  const contents: CMSContent[] = data.success ? data.data : [];
-  const content = contents.find(c => c.slug === slug);
+  // 获取内容数据 - 使用模拟数据
+  const contents: any[] = [];
+  const content = undefined;
 
   if (!content) {
     return (

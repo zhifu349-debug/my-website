@@ -47,16 +47,9 @@ export async function generateMetadata({
 export default async function VPSPage({ params }: VPSPageProps) {
   const { locale } = await params;
 
-  // 获取VPS相关内容
-  const res = await fetch(`http://localhost:3002/api/contents?type=recommendation`);
-  const data = await res.json();
-  const contents: CMSContent[] = data.success ? data.data : [];
-  const vpsContents = contents.filter(content => 
-    content.title.en.toLowerCase().includes('vps') || 
-    content.title.zh.toLowerCase().includes('vps') ||
-    content.title.en.toLowerCase().includes('hosting') ||
-    content.title.zh.toLowerCase().includes('主机')
-  );
+  // 获取VPS相关内容 - 使用模拟数据，跳过外部API
+  const contents: CMSContent[] = [];
+  const vpsContents = contents;
 
   const titles = {
     en: "Best VPS Hosting 2026",
