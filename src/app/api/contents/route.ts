@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contentStore } from "@/lib/content-store";
 import { CMSContent, ContentStatus } from "@/lib/cms-types";
+import { apiSecurity } from "@/lib/security/api-security";
+
+// 验证请求是否来自已登录用户
+function validateRequest(request: NextRequest): boolean {
+  return apiSecurity.validateAuth(request);
+}
 
 // GET /api/contents - 获取所有内容
 export async function GET(request: NextRequest) {
+  if (!validateRequest(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get("type");
@@ -32,6 +42,10 @@ export async function GET(request: NextRequest) {
 
 // POST /api/contents - 创建新内容
 export async function POST(request: NextRequest) {
+  if (!validateRequest(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const newContent = await contentStore.createContent(body);
