@@ -74,7 +74,7 @@ export default async function VPSPage({ params }: VPSPageProps) {
   });
 
   // 模拟数据作为后备
-  const mockRecommendationPage = {
+  const mockRecommendationPage: any = {
     id: "1",
     slug: "vps-recommendations",
     keyword: locale === "zh" ? "最佳vps" : "best vps",
