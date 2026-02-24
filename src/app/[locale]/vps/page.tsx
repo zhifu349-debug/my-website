@@ -75,8 +75,14 @@ export default async function VPSPage({ params }: VPSPageProps) {
 
   // 模拟数据作为后备
   const mockRecommendationPage = {
+    id: "1",
+    slug: "vps-recommendations",
+    keyword: locale === "zh" ? "最佳vps" : "best vps",
+    intent: "comparison",
     title: titles,
     subtitle: subtitles,
+    metaTitle: titles.en,
+    metaDescription: subtitles.en,
     solutions: [
       {
         id: "1",
