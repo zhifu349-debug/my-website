@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@next/third-parties": "^16.1.6",
     "@supabase/supabase-js": "^2.97.0",
     "contentful": "^11.10.4",
     "contentful-management": "^11.72.0",
