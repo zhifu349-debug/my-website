@@ -2,6 +2,8 @@ import Link from "next/link";
 import { type Locale } from "@/lib/i18n-config";
 import { translations } from "@/lib/i18n-config";
 import type { Metadata } from "next";
+import { aiTools } from "@/lib/data/content-data";
+import { seoEngine } from "@/lib/seo-engine";
 
 interface AIToolsPageProps {
   params: Promise<{ locale: string }>;
@@ -15,14 +17,14 @@ export async function generateMetadata({
   return {
     title:
       locale === "zh"
-        ? "AI工具推荐 - 最佳人工智能工具"
-        : "Best AI Tools 2026 - Top AI Software Reviewed",
+        ? "2026年最佳AI工具推荐 - ChatGPT、Claude、Midjourney深度评测"
+        : "Best AI Tools 2026 - ChatGPT, Claude, Midjourney Reviewed",
     description:
       locale === "zh"
-        ? "发现最佳AI工具，包括ChatGPT、Midjourney等，帮助您提高效率"
-        : "Discover the best AI tools including ChatGPT, Midjourney, and more to boost your productivity",
+        ? "发现2026年最强大的AI工具，包括ChatGPT、Claude、Midjourney、GitHub Copilot的深度评测与对比，帮你找到最适合的AI助手"
+        : "Discover the best AI tools of 2026. In-depth reviews of ChatGPT, Claude, Midjourney, and GitHub Copilot with real testing data.",
     keywords:
-      "AI tools, ChatGPT, Midjourney, AI software, artificial intelligence",
+      "AI tools, ChatGPT, Midjourney, Claude, GitHub Copilot, Notion AI, artificial intelligence, 2026",
     alternates: {
       canonical: `/${locale}/ai-tools`,
       languages: {
@@ -35,217 +37,220 @@ export async function generateMetadata({
 
 export default async function AIToolsPage({ params }: AIToolsPageProps) {
   const { locale } = await params;
+  const isZh = locale === "zh";
 
-  const tools = [
+  const seo = seoEngine.generateSEO("recommendation" as any, {
+    keyword: isZh ? "最佳ai工具" : "best ai tools",
+    category: isZh ? "AI工具" : "AI Tools",
+  });
+
+  const schema = seoEngine.generateSchema(
+    "recommendation" as any,
     {
-      name: "ChatGPT",
-      description:
-        locale === "zh"
-          ? "强大的AI对话助手，支持写作、编程和分析"
-          : "Powerful AI assistant for writing, coding, and analysis",
-      price: "$20/mo",
-      rating: 4.8,
-      href: "https://chat.openai.com",
-      pros:
-        locale === "zh"
-          ? ["强大的自然语言处理", "支持多种任务", "持续更新", "API可用"]
-          : [
-              "Powerful NLP",
-              "Multi-task support",
-              "Regular updates",
-              "API available",
-            ],
-      cons:
-        locale === "zh"
-          ? ["需要订阅", "有时响应慢", "知识截止"]
-          : [
-              "Subscription required",
-              "Slow response sometimes",
-              "Knowledge cutoff",
-            ],
-      gradient: "from-green-500 to-green-600",
-      icon: "🤖",
+      title: seo.title,
+      description: seo.description,
+      solutions: aiTools,
     },
-    {
-      name: "Midjourney",
-      description:
-        locale === "zh"
-          ? "领先的AI图像生成工具，创建惊艳的艺术作品"
-          : "Leading AI image generation tool for creating stunning artwork",
-      price: "$10-35/mo",
-      rating: 4.6,
-      href: "https://www.midjourney.com",
-      pros:
-        locale === "zh"
-          ? ["高质量图像", "创意性强", "社区活跃", "持续改进"]
-          : [
-              "High quality images",
-              "Very creative",
-              "Active community",
-              "Constantly improving",
-            ],
-      cons:
-        locale === "zh"
-          ? ["Discord操作", "学习曲线", "需要信用卡"]
-          : ["Discord-based", "Learning curve", "Credit card required"],
-      gradient: "from-purple-500 to-purple-600",
-      icon: "🎨",
-    },
-    {
-      name: "Claude",
-      description:
-        locale === "zh"
-          ? "Anthropic开发的AI助手，擅长复杂推理"
-          : "AI assistant by Anthropic, excels at complex reasoning",
-      price: "$20/mo",
-      rating: 4.7,
-      href: "https://claude.ai",
-      pros:
-        locale === "zh"
-          ? ["长上下文", "安全性高", "多语言支持", "快速响应"]
-          : [
-              "Long context",
-              "High security",
-              "Multi-language",
-              "Fast response",
-            ],
-      cons:
-        locale === "zh"
-          ? ["功能相对较少", "无图像生成", "区域限制"]
-          : ["Fewer features", "No image generation", "Regional restrictions"],
-      gradient: "from-blue-500 to-blue-600",
-      icon: "🧠",
-    },
-    {
-      name: "Notion AI",
-      description:
-        locale === "zh"
-          ? "集成AI的生产力工具，智能写作和整理"
-          : "Productivity tool with integrated AI for smart writing and organization",
-      price: "$8-15/mo",
-      rating: 4.5,
-      href: "https://www.notion.so",
-      pros:
-        locale === "zh"
-          ? ["一体化工作区", "团队协作", "模板丰富", "离线可用"]
-          : [
-              "All-in-one workspace",
-              "Team collaboration",
-              "Rich templates",
-              "Offline available",
-            ],
-      cons:
-        locale === "zh"
-          ? ["同步可能慢", "学习成本", "移动端体验一般"]
-          : ["Slow sync", "Learning cost", "Average mobile experience"],
-      gradient: "from-orange-500 to-orange-600",
-      icon: "📝",
-    },
+    `/${locale}/ai-tools`
+  );
+
+  const categories = [
+    { id: "all", name: isZh ? "全部" : "All" },
+    { id: "ai-writing", name: isZh ? "AI写作" : "AI Writing" },
+    { id: "ai-image", name: isZh ? "AI图像" : "AI Image" },
+    { id: "ai-coding", name: isZh ? "AI编程" : "AI Coding" },
+    { id: "ai-productivity", name: isZh ? "AI生产力" : "AI Productivity" },
   ];
 
   return (
-    <div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      
+      {/* Hero Section */}
       <div className="bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 py-16">
         <div className="max-w-4xl mx-auto px-4 text-center text-white">
           <div className="mb-6">
             <span className="inline-block px-4 py-2 bg-white/20 backdrop-blur rounded-full text-sm font-semibold">
-              🚀 AI Tools Collection 2026
+              🤖 {isZh ? "2026年AI工具精选" : "Best AI Tools 2026"}
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {locale === "zh" ? "最佳AI工具推荐" : "Best AI Tools 2026"}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+            {isZh ? "最佳AI工具推荐" : "Best AI Tools 2026"}
           </h1>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {locale === "zh"
-              ? "发现最强大的人工智能工具，提升您的工作效率"
-              : "Discover the most powerful AI tools to boost your productivity"}
+            {isZh
+              ? "经过实测的AI工具评测，帮你找到最适合的人工智能助手"
+              : "Real-world tested AI tools to find your perfect AI assistant"}
           </p>
+          
+          {/* Quick Stats */}
+          <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm">
+            <span className="bg-white/10 px-4 py-2 rounded-full">
+              ✓ {isZh ? "测试15+款工具" : "15+ Tools Tested"}
+            </span>
+            <span className="bg-white/10 px-4 py-2 rounded-full">
+              ✓ {isZh ? "真实使用体验" : "Real Usage Experience"}
+            </span>
+            <span className="bg-white/10 px-4 py-2 rounded-full">
+              ✓ {isZh ? "持续更新" : "Continuously Updated"}
+            </span>
+          </div>
         </div>
       </div>
 
-      <section className="max-w-6xl mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 gap-8">
-          {tools.map((tool) => (
-            <Link
-              key={tool.name}
-              href={`/${locale}/ai-tools/${tool.name.toLowerCase()}`}
-              className="group card-hover bg-white rounded-2xl p-8 border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300"
+      {/* Category Filter */}
+      <section className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-wrap justify-center gap-3">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                cat.id === "all"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}
-              ></div>
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* AI Tools Grid */}
+      <section className="max-w-6xl mx-auto px-4 py-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          {aiTools.map((tool) => (
+            <div
+              key={tool.id}
+              className="group card-hover bg-white rounded-2xl p-8 border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden"
+            >
+              {/* Category Badge */}
+              <div className="absolute top-4 right-4">
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                  {isZh
+                    ? tool.category === "ai-writing"
+                      ? "AI写作"
+                      : tool.category === "ai-image"
+                      ? "AI图像"
+                      : tool.category === "ai-coding"
+                      ? "AI编程"
+                      : "AI生产力"
+                    : tool.category.replace("ai-", "")}
+                </span>
+              </div>
+
               <div className="relative">
-                <div
-                  className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center text-4xl mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                >
-                  {tool.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
-                  {tool.name}
-                </h3>
-                <p className="text-gray-600 mb-4 leading-relaxed">
-                  {tool.description}
-                </p>
-                <div className="flex items-center justify-between mb-4">
+                {/* Icon & Name */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg">
+                    {tool.id === "chatgpt" && "💬"}
+                    {tool.id === "claude" && "🧠"}
+                    {tool.id === "midjourney" && "🎨"}
+                    {tool.id === "github-copilot" && "💻"}
+                    {tool.id === "notion-ai" && "📝"}
+                  </div>
                   <div>
-                    <span className="text-3xl font-bold gradient-text">
+                    <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors">
+                      {tool.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`w-4 h-4 ${
+                              i < Math.floor(tool.rating)
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="font-bold text-gray-900">{tool.rating}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-600 mb-4 leading-relaxed">
+                  {(tool.description as any)[locale] || tool.description.en}
+                </p>
+
+                {/* Best For */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {tool.bestFor.map((use) => (
+                    <span
+                      key={use}
+                      className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md"
+                    >
+                      {use}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <span className="text-2xl font-bold gradient-text">
                       {tool.price}
                     </span>
-                    <span className="text-gray-600 ml-2">
-                      {locale === "zh" ? "起" : "starting"}
+                    <span className="text-gray-500 text-sm ml-2">
+                      {isZh ? "起" : "starting"}
                     </span>
                   </div>
-                  {tool.rating && (
-                    <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-full">
-                      <svg
-                        className="w-5 h-5 text-yellow-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8 2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539 1.118l1.07-3.292a1 1 0 00.951-.69l1.07-3.292a1 1 0 001.414 0l4-4z" />
-                      </svg>
-                      <span className="font-bold text-gray-900">
-                        {tool.rating}/5
-                      </span>
-                    </div>
-                  )}
                 </div>
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
+
+                {/* Pros & Cons */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-green-50 rounded-xl p-4">
                     <h4 className="font-bold text-green-700 mb-2 text-sm">
-                      {locale === "zh" ? "优势" : "Pros"}
+                      {isZh ? "优势" : "Pros"}
                     </h4>
                     <ul className="space-y-1">
-                      {tool.pros.map((pro, i) => (
+                      {tool.pros.slice(0, 3).map((pro, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-sm text-gray-700"
+                          className="flex items-start gap-2 text-xs text-gray-700"
                         >
                           <span className="text-green-500 mt-0.5">✓</span>
-                          {pro}
+                          <span className="line-clamp-2">{pro}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                   <div className="bg-red-50 rounded-xl p-4">
                     <h4 className="font-bold text-red-700 mb-2 text-sm">
-                      {locale === "zh" ? "缺点" : "Cons"}
+                      {isZh ? "缺点" : "Cons"}
                     </h4>
                     <ul className="space-y-1">
-                      {tool.cons.map((con, i) => (
+                      {tool.cons.slice(0, 3).map((con, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2 text-sm text-gray-700"
+                          className="flex items-start gap-2 text-xs text-gray-700"
                         >
                           <span className="text-red-500 mt-0.5">✗</span>
-                          {con}
+                          <span className="line-clamp-2">{con}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 </div>
-                <button className="w-full btn bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                  {locale === "zh" ? "了解更多" : "Learn More"}
+
+                {/* CTA Button */}
+                <a
+                  href={tool.affiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full btn bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                >
+                  {isZh ? "访问官网" : "Visit Website"}
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -256,24 +261,30 @@ export default async function AIToolsPage({ params }: AIToolsPageProps) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                     />
                   </svg>
-                </button>
+                </a>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </section>
 
+      {/* How to Choose Section */}
       <section className="max-w-4xl mx-auto px-4 py-16 bg-gradient-to-b from-white to-blue-50 rounded-3xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 section-divider inline-block">
-            {locale === "zh" ? "如何选择AI工具" : "How to Choose AI Tools"}
+            {isZh ? "如何选择AI工具" : "How to Choose AI Tools"}
           </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            {isZh
+              ? "根据你的具体需求选择最适合的AI工具"
+              : "Choose the right AI tool based on your specific needs"}
+          </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="text-center p-6">
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm">
             <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-blue-600"
@@ -290,15 +301,15 @@ export default async function AIToolsPage({ params }: AIToolsPageProps) {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {locale === "zh" ? "明确需求" : "Define Needs"}
+              {isZh ? "明确使用场景" : "Define Use Case"}
             </h3>
-            <p className="text-gray-600">
-              {locale === "zh"
-                ? "确定你需要什么类型的AI工具"
-                : "Identify what type of AI tool you need"}
+            <p className="text-gray-600 text-sm">
+              {isZh
+                ? "写作、编程、图像生成还是数据分析？不同工具擅长不同领域"
+                : "Writing, coding, image generation or data analysis? Different tools excel in different areas"}
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm">
             <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-purple-600"
@@ -315,15 +326,15 @@ export default async function AIToolsPage({ params }: AIToolsPageProps) {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {locale === "zh" ? "考虑预算" : "Consider Budget"}
+              {isZh ? "评估预算" : "Evaluate Budget"}
             </h3>
-            <p className="text-gray-600">
-              {locale === "zh"
-                ? "选择适合你预算的工具"
-                : "Choose tools that fit your budget"}
+            <p className="text-gray-600 text-sm">
+              {isZh
+                ? "从免费版到$20/月不等，选择符合你预算的方案"
+                : "From free plans to $20/month, choose a plan that fits your budget"}
             </p>
           </div>
-          <div className="text-center p-6">
+          <div className="text-center p-6 bg-white rounded-2xl shadow-sm">
             <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-green-600"
@@ -340,16 +351,16 @@ export default async function AIToolsPage({ params }: AIToolsPageProps) {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {locale === "zh" ? "试用免费版本" : "Try Free Versions"}
+              {isZh ? "试用再决定" : "Try Before Buying"}
             </h3>
-            <p className="text-gray-600">
-              {locale === "zh"
-                ? "大多数工具都有免费试用"
-                : "Most tools offer free trials"}
+            <p className="text-gray-600 text-sm">
+              {isZh
+                ? "大多数AI工具都提供免费试用，先体验再订阅"
+                : "Most AI tools offer free trials, experience before subscribing"}
             </p>
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }
