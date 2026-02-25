@@ -10,11 +10,12 @@ export class AffiliateManager {
 
   // 初始化默认联盟链接
   private initializeDefaultLinks() {
+    // 注意：这些链接应从环境变量读取，不要在代码中硬编码真实联盟ID
     const defaultLinks: AffiliateLink[] = [
       {
         id: "vultr-main",
         name: "Vultr Affiliate",
-        url: "https://www.vultr.com/?ref=example123",
+        url: process.env.AFFILIATE_VULTR || "https://www.vultr.com/",
         productId: "vultr",
         ctaText: "Get Started with Vultr",
         enabled: true,
@@ -25,7 +26,7 @@ export class AffiliateManager {
       {
         id: "do-main",
         name: "DigitalOcean Affiliate",
-        url: "https://www.digitalocean.com/?refcode=example456",
+        url: process.env.AFFILIATE_DIGITALOCEAN || "https://www.digitalocean.com/",
         productId: "digitalocean",
         ctaText: "Try DigitalOcean",
         enabled: true,
@@ -36,7 +37,7 @@ export class AffiliateManager {
       {
         id: "linode-main",
         name: "Linode Affiliate",
-        url: "https://www.linode.com/?r=example789",
+        url: process.env.AFFILIATE_LINODE || "https://www.linode.com/",
         productId: "linode",
         ctaText: "Deploy on Linode",
         enabled: true,
