@@ -1,12 +1,15 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+  
   return {
     rules: {
       userAgent: "*",
       allow: "/",
       disallow: ["/api/", "/admin/"],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || "https://yourdomain.com"}/sitemap.xml`,
+    host: baseUrl,
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
