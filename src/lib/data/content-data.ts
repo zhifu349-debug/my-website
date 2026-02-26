@@ -714,7 +714,7 @@ export const resources = [
     category: "guide",
     price: 29,
     rating: 4.9,
-    downloads: 5200,
+    // Content coming soon,
     description: {
       en: "Complete guide to VPS hosting: selection, setup, security, and optimization. Over 200 pages of practical content.",
       zh: "VPS主机完整指南：选择、配置、安全和优化。超过200页的实用内容。",
@@ -743,7 +743,7 @@ export const resources = [
     category: "course",
     price: 49,
     rating: 4.8,
-    downloads: 3100,
+    // Content coming soon,
     description: {
       en: "Comprehensive container course covering Docker, Compose, and Kubernetes. Real-world projects included.",
       zh: "全面覆盖Docker、Compose和Kubernetes的容器课程。包含真实项目实战。",
@@ -772,7 +772,7 @@ export const resources = [
     category: "handbook",
     price: 19,
     rating: 4.7,
-    downloads: 4800,
+    // Content coming soon,
     description: {
       en: "Essential patterns for building scalable React applications. Hooks, state management, and performance tips.",
       zh: "构建可扩展React应用的必备模式。Hooks、状态管理和性能技巧。",
@@ -800,7 +800,7 @@ export const resources = [
     category: "security",
     price: 35,
     rating: 4.8,
-    downloads: 2800,
+    // Content coming soon,
     description: {
       en: "Protect your APIs from attacks. Authentication, authorization, rate limiting, and penetration testing.",
       zh: "保护你的API免受攻击。认证、授权、限流和渗透测试。",
@@ -828,7 +828,7 @@ export const resources = [
     category: "optimization",
     price: 39,
     rating: 4.6,
-    downloads: 3500,
+    // Content coming soon,
     description: {
       en: "Speed up your website: Core Web Vitals, caching, CDN, and image optimization techniques.",
       zh: "加速你的网站：Core Web Vitals、缓存、CDN和图片优化技术。",
@@ -856,7 +856,7 @@ export const resources = [
     category: "devops",
     price: 59,
     rating: 4.9,
-    downloads: 2100,
+    // Content coming soon,
     description: {
       en: "Deploy to AWS, Azure, GCP, and more. Infrastructure as Code, CI/CD, and monitoring.",
       zh: "部署到AWS、Azure、GCP等云平台。基础设施即代码、CI/CD和监控。",
