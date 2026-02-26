@@ -4,6 +4,7 @@ import { translations } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 import { aiTools } from "@/lib/data/content-data";
 import { seoEngine } from "@/lib/seo-engine";
+import Comments from "@/components/Comments";
 
 interface AIToolsPageProps {
   params: Promise<{ locale: string }>;
@@ -361,6 +362,11 @@ export default async function AIToolsPage({ params }: AIToolsPageProps) {
           </div>
         </div>
       </section>
+
+      {/* 评论区 */}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <Comments path={`/${locale}/ai-tools`} locale={locale as "en" | "zh"} />
+      </div>
     </>
   );
 }

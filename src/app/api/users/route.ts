@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/data/user-store';
+import { userStoreServer } from '@/lib/data/user-store-server';
 import { CreateUserDto, UpdateUserDto } from '@/types/user';
 import { apiSecurity } from '@/lib/security/api-security';
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const users = userStore.getUsers();
+    const users = userStoreServer.getUsers();
     // 移除密码字段
     const safeUsers = users.map(({ password, ...user }) => user);
     return NextResponse.json({ success: true, data: safeUsers });
@@ -37,11 +37,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户名是否已存在
-    if (userStore.getUserByUsername(userData.username)) {
+    if (userStoreServer.getUserByUsername(userData.username)) {
       return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
     }
 
-    const newUser = userStore.createUser(userData);
+    const newUser = userStoreServer.createUser(userData);
     // 移除密码字段
     const { password, ...safeUser } = newUser;
 

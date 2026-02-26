@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/data/user-store';
+import { userStoreServer } from '@/lib/data/user-store-server';
 
 // 验证请求是否来自已登录用户
 function validateRequest(request: NextRequest): boolean {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const limit = request.nextUrl.searchParams.get('limit') ? parseInt(request.nextUrl.searchParams.get('limit')!) : 50;
-    const loginHistories = userStore.getLoginHistories(id, limit);
+    const loginHistories = userStoreServer.getLoginHistories(id, limit);
     return NextResponse.json({ success: true, data: loginHistories });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

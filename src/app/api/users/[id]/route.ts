@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/data/user-store';
+import { userStoreServer } from '@/lib/data/user-store-server';
 import { UpdateUserDto } from '@/types/user';
 import { apiSecurity } from '@/lib/security/api-security';
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   try {
     const { id } = await params;
-    const user = userStore.getUserById(id);
+    const user = userStoreServer.getUserById(id);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const userData: UpdateUserDto = await request.json();
-    const updatedUser = userStore.updateUser(id, userData);
+    const updatedUser = userStoreServer.updateUser(id, userData);
 
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -62,7 +62,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Cannot delete default admin user' }, { status: 403 });
     }
 
-    const success = userStore.deleteUser(id);
+    const success = userStoreServer.deleteUser(id);
     if (!success) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }

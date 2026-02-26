@@ -1,19 +1,29 @@
-import { MetadataRoute } from "next";
+import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SEO Content Monetization System",
-    short_name: "SEO CMS",
-    description: "SEO-driven content monetization platform",
-    start_url: "/",
-    display: "standalone",
-    background_color: "#2563eb",
-    theme_color: "#2563eb",
+    name: 'xcodezg - Tech Reviews & Tutorials',
+    short_name: 'xcodezg',
+    description: 'Discover the best VPS, AI tools, and tech tutorials',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#2563eb',
     icons: [
       {
-        src: "/icon",
-        sizes: "any",
-        type: "image/svg+xml",
+        src: '/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+      {
+        src: '/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
       },
     ],
   };

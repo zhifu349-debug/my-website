@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { comparisons } from "@/lib/data/content-data";
+import Comments from "@/components/Comments";
 
 interface ComparisonsPageProps {
   params: Promise<{ locale: string }>;
@@ -213,6 +214,11 @@ export default async function ComparisonsPage({
             </div>
           </div>
         </div>
+      </section>
+
+      {/* 评论区 */}
+      <section className="max-w-6xl mx-auto px-4 py-12">
+        <Comments path={`/${locale}/comparisons`} locale={locale as "en" | "zh"} />
       </section>
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { userStore } from '@/lib/data/user-store'
 import { CaptchaUtils, loginAttemptLimiter } from '@/lib/security/security-utils'
 
 export default function AdminLoginPage() {
@@ -37,16 +36,17 @@ export default function AdminLoginPage() {
       // 验证输入
       if (!username || !password || !captcha) {
         setError('请填写所有必填字段')
+        setIsLoading(false)
         return
       }
 
       // 获取客户端信息
       const ipAddress = await getClientIp()
-      const userAgent = navigator.userAgent
 
       // 检查是否被锁定
       if (loginAttemptLimiter.isLocked(username, ipAddress)) {
         setError('登录失败次数过多，请15分钟后再试')
+        setIsLoading(false)
         return
       }
 
@@ -54,51 +54,37 @@ export default function AdminLoginPage() {
       if (!CaptchaUtils.verifyCaptcha(captcha, generatedCaptcha)) {
         setError('验证码错误')
         generateNewCaptcha()
+        setIsLoading(false)
         return
       }
 
-      // 验证凭证
-      const user = userStore.getUserByUsername(username)
+      // 调用登录 API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+
+      const data = await response.json()
       
-      if (user && user.password === password && user.status === 'active') {
+      if (response.ok && data.success) {
         // 重置登录尝试计数
         loginAttemptLimiter.resetAttempts(username, ipAddress)
-        
-        // 更新最后登录时间
-        userStore.updateLastLogin(user.id)
-        
-        // 记录登录成功历史
-        userStore.addLoginHistory({
-          userId: user.id,
-          timestamp: new Date().toISOString(),
-          ipAddress,
-          userAgent,
-          status: 'success'
-        })
 
         // 生成并存储token
         const token = btoa(`${username}:${Date.now()}`)
         localStorage.setItem('adminToken', token)
-        localStorage.setItem('currentUser', JSON.stringify({ id: user.id, username: user.username, role: user.role }))
+        localStorage.setItem('currentUser', JSON.stringify({ 
+          id: data.user.id, 
+          username: data.user.username, 
+          role: data.user.role 
+        }))
         
         // 登录成功，重定向到管理后台
         router.push('/zh/admin')
       } else {
         // 记录登录尝试
         const isLocked = loginAttemptLimiter.recordAttempt(username, ipAddress)
-        
-        // 记录登录失败历史
-        const existingUser = userStore.getUserByUsername(username)
-        if (existingUser) {
-          userStore.addLoginHistory({
-            userId: existingUser.id,
-            timestamp: new Date().toISOString(),
-            ipAddress: await getClientIp(),
-            userAgent: navigator.userAgent,
-            status: 'failed',
-            errorMessage: '密码错误'
-          })
-        }
         
         if (isLocked) {
           setError('登录失败次数过多，请15分钟后再试')
@@ -245,9 +231,8 @@ export default function AdminLoginPage() {
             </button>
           </div>
 
-          <div className="text-center text-xs text-gray-500">
-            <p>默认凭证：admin / admin123</p>
-            <p className="mt-1">生产环境请修改默认凭证</p>
+          <div className="text-center text-xs text-gray-400">
+            <p>请使用配置的管理员账号登录</p>
           </div>
         </form>
       </div>

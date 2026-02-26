@@ -4,6 +4,7 @@ import RecommendationTemplate from "@/components/templates/RecommendationTemplat
 import PageEditorButton from "@/components/editor/PageEditorButton";
 import { type Locale } from "@/lib/i18n-config";
 import { vpsProviders, commonFAQs } from "@/lib/data/content-data";
+import Comments from "@/components/Comments";
 
 interface VPSPageProps {
   params: Promise<{ locale: string }>;
@@ -183,6 +184,11 @@ export default async function VPSPage({ params }: VPSPageProps) {
         data={vpsData}
         locale={locale as Locale}
       />
+
+      {/* 评论区 */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <Comments path={`/${locale}/vps`} locale={locale as "en" | "zh"} />
+      </div>
     </>
   );
 }

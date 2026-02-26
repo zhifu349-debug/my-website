@@ -1,0 +1,30 @@
+export const runtime = 'edge';
+
+export const alt = 'xcodezg - Tech Reviews & Tutorials';
+export const size = {
+  width: 1200,
+  height: 630,
+};
+export const contentType = 'image/png';
+
+export default function OpenGraphImage() {
+  return new Response(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="630" fill="url(#grad)"/>
+      <text x="600" y="280" font-family="system-ui, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="white">xcodezg</text>
+      <text x="600" y="360" font-family="system-ui, sans-serif" font-size="36" text-anchor="middle" fill="white" opacity="0.9">Best VPS, AI Tools & Tech Tutorials</text>
+      <text x="600" y="420" font-family="system-ui, sans-serif" font-size="28" text-anchor="middle" fill="white" opacity="0.7">Expert Reviews & Step-by-Step Guides</text>
+    </svg>`,
+    {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+      },
+    }
+  );
+}

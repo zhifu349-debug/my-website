@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { I18nProvider } from "@/components/layout/LayoutProvider";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
+import NetworkStatus from "@/components/ui/NetworkStatus";
 import { locales, type Locale } from "@/lib/i18n-config";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -35,6 +36,7 @@ export default async function LocaleLayout({
   return (
     <>
       <I18nProvider initialLocale={locale as Locale}>
+        <NetworkStatus />
         <Navigation />
         <main className="min-h-screen pt-16">{children}</main>
         <Footer />

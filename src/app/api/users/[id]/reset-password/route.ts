@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { userStore } from '@/lib/data/user-store';
+import { userStoreServer } from '@/lib/data/user-store-server';
 
 // 验证请求是否来自已登录用户
 function validateRequest(request: NextRequest): boolean {
@@ -20,14 +20,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'New password is required' }, { status: 400 });
     }
 
-    const updatedUser = userStore.updatePassword(id, newPassword);
+    const updatedUser = userStoreServer.updatePassword(id, newPassword);
 
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // 记录密码重置活动
-    userStore.addActivity({
+    userStoreServer.addActivity({
       userId: id,
       timestamp: new Date().toISOString(),
       action: 'password_reset',

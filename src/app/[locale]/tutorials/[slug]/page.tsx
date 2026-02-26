@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
+import Comments from "@/components/Comments";
 
 interface TutorialDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -1045,6 +1046,11 @@ export default async function TutorialDetailPage({ params }: TutorialDetailPageP
               {tutorial.content[locale as Locale]}
             </pre>
           </div>
+        </div>
+
+        {/* 评论区 */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <Comments path={`/tutorials/${slug}`} locale={locale as "en" | "zh"} />
         </div>
       </div>
     </div>
