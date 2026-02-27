@@ -1,7 +1,33 @@
 // SEO存储（使用Supabase数据库）
 
-import any fromseo';
 import { createClient } from '@supabase/supabase-js';
+
+// SEO 类型定义
+interface Keyword {
+  id: string;
+  keyword: string;
+  searchVolume: number;
+  difficulty: number;
+  intent: string;
+  cpc?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface SEORule {
+  id: string;
+  pageType: string;
+  titleTemplate: string;
+  descriptionTemplate: string;
+  h1Template: string;
+  h2Templates: string[];
+  requiredSections: string[];
+  suggestedLength: {
+    title: { min: number; max: number };
+    description: { min: number; max: number };
+    content: { min: number; max: number };
+  };
+}
 
 // 创建Supabase客户端
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';

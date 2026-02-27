@@ -25,6 +25,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
+.env.local
+.env.production
 .env*.local
 
 # vercel
@@ -39,5 +42,7 @@ next-env.d.ts
 .idea
 *.swp
 *.swo
-*.env.local
 scripts/create-content-model.ts
+
+# data files (runtime)
+.data/

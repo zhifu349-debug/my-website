@@ -67,8 +67,7 @@ async function sendFeishuMessage(chatId: string, text: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('收到飞书消息:', JSON.stringify(body, null, 2));
-    
+
     // 处理URL验证（首次配置时需要）
     if (body.type === 'url_verification') {
       return NextResponse.json({
@@ -88,8 +87,7 @@ export async function POST(request: NextRequest) {
       
       // 存储Chat ID
       storedChatId = chatId;
-      console.log(`收到${chatType === 'p2p' ? '单聊' : '群聊'}消息，Chat ID: ${chatId}`);
-      
+
       // 获取消息内容
       const content = JSON.parse(message.content);
       const text = content.text || '';
