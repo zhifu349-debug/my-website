@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 import Comments from "@/components/Comments";
@@ -975,37 +976,47 @@ server {
 export async function generateMetadata({
   params,
 }: TutorialDetailPageProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
   const tutorial = tutorialsData[slug];
 
   if (!tutorial) {
     return { title: locale === "zh" ? "未找到" : "Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+
   return {
     title: tutorial.title[locale as Locale],
     description: tutorial.description[locale as Locale],
+    alternates: {
+      canonical: `${siteUrl}/${locale}/tutorials/${slug}`,
+      languages: {
+        en: `${siteUrl}/en/tutorials/${slug}`,
+        zh: `${siteUrl}/zh/tutorials/${slug}`,
+      },
+    },
   };
 }
 
 export default async function TutorialDetailPage({ params }: TutorialDetailPageProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
   const tutorial = tutorialsData[slug];
   const isZh = locale === "zh";
 
   if (!tutorial) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            {isZh ? "教程未找到" : "Tutorial Not Found"}
-          </h1>
-          <Link href={`/${locale}/tutorials`} className="text-blue-600 hover:underline">
-            {isZh ? "返回教程列表" : "Back to Tutorials"}
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (

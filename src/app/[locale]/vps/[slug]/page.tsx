@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 
@@ -84,7 +85,13 @@ const vpsData: Record<string, any> = {
 export async function generateMetadata({
   params,
 }: VPSDetailPageProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
   const vps = vpsData[slug];
 
   if (!vps) {
@@ -93,28 +100,34 @@ export async function generateMetadata({
     };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+
   return {
     title: locale === "zh" ? `${vps.name} VPS 评测` : `${vps.name} VPS Review`,
     description: vps.description[locale as Locale],
+    alternates: {
+      canonical: `${siteUrl}/${locale}/vps/${slug}`,
+      languages: {
+        en: `${siteUrl}/en/vps/${slug}`,
+        zh: `${siteUrl}/zh/vps/${slug}`,
+      },
+    },
   };
 }
 
 export default async function VPSDetailPage({ params }: VPSDetailPageProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
   const vps = vpsData[slug];
   const isZh = locale === "zh";
 
   if (!vps) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">{isZh ? "未找到" : "Not Found"}</h1>
-          <Link href={`/${locale}/vps`} className="text-blue-600 hover:underline">
-            {isZh ? "返回VPS列表" : "Back to VPS List"}
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (

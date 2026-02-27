@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 
@@ -156,37 +157,47 @@ const comparisonsData: Record<string, any> = {
 export async function generateMetadata({
   params,
 }: ComparisonDetailPageProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
   const comparison = comparisonsData[slug];
 
   if (!comparison) {
     return { title: locale === "zh" ? "未找到" : "Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+
   return {
     title: comparison.title[locale as Locale],
     description: comparison.description[locale as Locale],
+    alternates: {
+      canonical: `${siteUrl}/${locale}/comparisons/${slug}`,
+      languages: {
+        en: `${siteUrl}/en/comparisons/${slug}`,
+        zh: `${siteUrl}/zh/comparisons/${slug}`,
+      },
+    },
   };
 }
 
 export default async function ComparisonDetailPage({ params }: ComparisonDetailPageProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
   const comparison = comparisonsData[slug];
   const isZh = locale === "zh";
 
   if (!comparison) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            {isZh ? "对比未找到" : "Comparison Not Found"}
-          </h1>
-          <Link href={`/${locale}/comparisons`} className="text-blue-600 hover:underline">
-            {isZh ? "返回对比列表" : "Back to Comparisons"}
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { type Locale } from "@/lib/i18n-config";
 import { CMSContent } from "@/lib/cms-types";
@@ -8,7 +9,13 @@ interface ContentDetailProps {
 }
 
 export async function generateMetadata({ params }: ContentDetailProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
 
   try {
     // 获取内容数据 - 使用模拟数据
@@ -16,15 +23,16 @@ export async function generateMetadata({ params }: ContentDetailProps): Promise<
     const content = undefined;
 
     if (content) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
       return {
         title: content.seo.title[locale as keyof typeof content.seo.title] || content.title[locale as keyof typeof content.title],
         description: content.seo.description[locale as keyof typeof content.seo.description],
         keywords: content.seo.keywords[locale as keyof typeof content.seo.keywords],
         alternates: {
-          canonical: `/${locale}/contents/${slug}`,
+          canonical: `${siteUrl}/${locale}/contents/${slug}`,
           languages: {
-            en: `/en/contents/${slug}`,
-            zh: `/zh/contents/${slug}`,
+            en: `${siteUrl}/en/contents/${slug}`,
+            zh: `${siteUrl}/zh/contents/${slug}`,
           },
         },
       };
@@ -40,40 +48,20 @@ export async function generateMetadata({ params }: ContentDetailProps): Promise<
 }
 
 export default async function ContentDetailPage({ params }: ContentDetailProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
 
   // 获取内容数据 - 使用模拟数据
   const contents: any[] = [];
   const content = undefined;
 
   if (!content) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
-          <div className="text-6xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {locale === "zh" ? "内容不存在" : "Content Not Found"}
-          </h1>
-          <p className="text-gray-600 mb-6">
-            {locale === "zh" ? "请求的内容不存在或已被删除。" : "The requested content does not exist or has been deleted."}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href={`/${locale}/contents`} 
-              className="btn bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl"
-            >
-              {locale === "zh" ? "返回内容列表" : "Back to Content List"}
-            </Link>
-            <Link 
-              href={`/${locale}/admin`} 
-              className="btn bg-white text-gray-700 px-6 py-3 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl border border-gray-200"
-            >
-              {locale === "zh" ? "管理内容" : "Manage Content"}
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (

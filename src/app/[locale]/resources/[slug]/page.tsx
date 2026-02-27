@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 
@@ -259,37 +260,47 @@ const resourcesData: Record<string, any> = {
 export async function generateMetadata({
   params,
 }: ResourceDetailPageProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
   const resource = resourcesData[slug];
 
   if (!resource) {
     return { title: locale === "zh" ? "未找到" : "Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+
   return {
     title: resource.title[locale as Locale],
     description: resource.description[locale as Locale],
+    alternates: {
+      canonical: `${siteUrl}/${locale}/resources/${slug}`,
+      languages: {
+        en: `${siteUrl}/en/resources/${slug}`,
+        zh: `${siteUrl}/zh/resources/${slug}`,
+      },
+    },
   };
 }
 
 export default async function ResourceDetailPage({ params }: ResourceDetailPageProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
   const resource = resourcesData[slug];
   const isZh = locale === "zh";
 
   if (!resource) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            {isZh ? "资源未找到" : "Resource Not Found"}
-          </h1>
-          <Link href={`/${locale}/resources`} className="text-blue-600 hover:underline">
-            {isZh ? "返回资源列表" : "Back to Resources"}
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (

@@ -9,7 +9,8 @@ interface ResourcesPageProps {
 export async function generateMetadata({
   params,
 }: ResourcesPageProps): Promise<Metadata> {
-  const { locale } = await params;
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale || "en";
   const isZh = locale === "zh";
 
   return {
@@ -31,7 +32,8 @@ export async function generateMetadata({
 }
 
 export default async function ResourcesPage({ params }: ResourcesPageProps) {
-  const { locale } = await params;
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale || "en";
   const isZh = locale === "zh";
 
   const categories = [
@@ -162,7 +164,7 @@ export default async function ResourcesPage({ params }: ResourcesPageProps) {
 
                 {/* Stats */}
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4 pt-4 border-t border-gray-100">
-                  <span>{resource.downloads.toLocaleString()} {isZh ? "购买" : "sales"}</span>
+                  <span>{resource.downloads?.toLocaleString?.() || "0"} {isZh ? "购买" : "sales"}</span>
                   <span className="flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

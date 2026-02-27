@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { type Locale } from "@/lib/i18n-config";
 import type { Metadata } from "next";
 
@@ -204,37 +205,47 @@ const aiToolsData: Record<string, any> = {
 export async function generateMetadata({
   params,
 }: AIToolDetailPageProps): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    return { title: "Not Found" };
+  }
+  
+  const { locale, slug } = resolvedParams;
   const tool = aiToolsData[slug];
 
   if (!tool) {
     return { title: locale === "zh" ? "未找到" : "Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.xcodezg.com";
+
   return {
     title: tool.name + " - " + (locale === "zh" ? "AI工具评测" : "AI Tool Review"),
     description: tool.description[locale as Locale],
+    alternates: {
+      canonical: `${siteUrl}/${locale}/ai-tools/${slug}`,
+      languages: {
+        en: `${siteUrl}/en/ai-tools/${slug}`,
+        zh: `${siteUrl}/zh/ai-tools/${slug}`,
+      },
+    },
   };
 }
 
 export default async function AIToolDetailPage({ params }: AIToolDetailPageProps) {
-  const { locale, slug } = await params;
+  const resolvedParams = await params;
+  
+  if (!resolvedParams) {
+    notFound();
+  }
+  
+  const { locale, slug } = resolvedParams;
   const tool = aiToolsData[slug];
   const isZh = locale === "zh";
 
   if (!tool) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">
-            {isZh ? "工具未找到" : "Tool Not Found"}
-          </h1>
-          <Link href={`/${locale}/ai-tools`} className="text-blue-600 hover:underline">
-            {isZh ? "返回AI工具列表" : "Back to AI Tools"}
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   const featuresList = isZh ? tool.featuresZh : tool.features.map((f: any) => f.name);
