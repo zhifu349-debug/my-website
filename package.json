@@ -9,7 +9,13 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:functional": "jest --testPathPattern='__tests__/functional'",
+    "test:performance": "jest --testPathPattern='__tests__/performance'",
+    "test:stability": "jest --testPathPattern='__tests__/stability'",
+    "test:quality": "jest --testPathPattern='__tests__/quality'",
+    "test:all": "ts-node scripts/run-tests.ts",
+    "test:report": "jest --coverage --coverageReporters=json --coverageReporters=html --coverageReporters=text"
   },
   "dependencies": {
     "@google-analytics/data": "^5.2.1",
