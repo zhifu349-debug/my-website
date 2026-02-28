@@ -17,17 +17,18 @@ export const translations = {
       tutorials: "Tutorials",
       comparisons: "Comparisons",
       resources: "Resources",
+      about: "About Us",
     },
     footer: {
       about: "About",
       aboutText:
-        "SEO-driven content monetization platform providing in-depth reviews, comparisons, and tutorials to help you make informed decisions.",
+        "Your trusted source for tech reviews and comparisons. We provide in-depth reviews of VPS hosting, AI tools, and software to help you make informed decisions.",
       categories: "Categories",
       legal: "Legal",
       privacyPolicy: "Privacy Policy",
       termsOfService: "Terms of Service",
       affiliateDisclosure: "Affiliate Disclosure",
-      copyright: "© 2026 CMS. All rights reserved.",
+      copyright: "© 2026 xcodezg. All rights reserved.",
     },
     home: {
       title: "Find Best Tools & Services",
@@ -230,17 +231,18 @@ export const translations = {
       tutorials: "教程",
       comparisons: "对比",
       resources: "资源",
+      about: "关于我们",
     },
     footer: {
       about: "关于我们",
       aboutText:
-        "SEO驱动的内容变现平台，提供深度评测、对比和教程，帮助您做出明智决策。",
+        "您值得信赖的技术评测与对比平台。我们提供VPS主机、AI工具和软件的深度评测，帮助您做出明智决策。",
       categories: "分类",
       legal: "法律",
       privacyPolicy: "隐私政策",
       termsOfService: "服务条款",
       affiliateDisclosure: "联盟声明",
-      copyright: "© 2026 CMS. 版权所有。",
+      copyright: "© 2026 xcodezg. 版权所有。",
     },
     home: {
       title: "寻找最佳工具与服务",

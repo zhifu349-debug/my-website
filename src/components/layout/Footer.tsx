@@ -21,6 +21,7 @@ export default function Footer() {
   ];
 
   const legalItems = [
+    { href: "/about", labelKey: "navigation.about" },
     { href: "/privacy", labelKey: "footer.privacyPolicy" },
     { href: "/terms", labelKey: "footer.termsOfService" },
     { href: "/affiliate", labelKey: "footer.affiliateDisclosure" },

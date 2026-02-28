@@ -10,10 +10,37 @@ import { locales, type Locale } from "@/lib/i18n-config";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "SEO Content Monetization System",
-  description: "High-conversion SEO content platform",
-};
+// 根据 locale 动态生成 metadata
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  
+  const metadataByLocale: Record<string, Metadata> = {
+    en: {
+      title: "xcodezg - Expert Reviews & Comparisons of VPS, AI Tools & More",
+      description: "Discover the best VPS hosting, AI tools, and tech services through in-depth reviews and comparisons. Free, unbiased guides to help you decide.",
+      keywords: ["VPS hosting", "AI tools", "tech reviews", "VPS comparison", "AI software", "developer tools", "cloud hosting"],
+      openGraph: {
+        title: "xcodezg - Expert Tech Reviews & Developer Resources",
+        description: "Discover the best VPS hosting, AI tools, and tech services through in-depth reviews and comparisons.",
+        type: "website",
+        locale: "en_US",
+      },
+    },
+    zh: {
+      title: "xcodezg - VPS主机与AI工具深度评测和对比",
+      description: "发现最佳VPS主机、AI工具和技术服务。通过深度评测和对比，获取免费、公正的指南，帮助您做出明智决策。",
+      keywords: ["VPS主机", "AI工具", "技术评测", "VPS对比", "AI软件", "开发者工具", "云主机"],
+      openGraph: {
+        title: "xcodezg - 专业技术评测与开发者资源",
+        description: "发现最佳VPS主机、AI工具和技术服务。通过深度评测和对比，获取免费、公正的指南。",
+        type: "website",
+        locale: "zh_CN",
+      },
+    },
+  };
+
+  return metadataByLocale[locale] || metadataByLocale.en;
+}
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
